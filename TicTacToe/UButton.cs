@@ -10,15 +10,12 @@ using System.Windows.Forms;
 
 namespace TicTacToe
 {
-    partial class TicTacToe
+    public partial class UButton : Button
     {
-        private class UButton : Button
+        public UButton()
         {
-            public UButton()
-            {
-                FlatStyle = FlatStyle.Standard;
-                SetStyle(ControlStyles.Selectable, false);
-            }
+            FlatStyle = System.Windows.Forms.FlatStyle.Standard;
+            SetStyle(System.Windows.Forms.ControlStyles.Selectable, false);
         }
     }
 }
