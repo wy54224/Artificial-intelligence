@@ -1,0 +1,9 @@
+E:\various homework\人工智能\TicTacToe\bin\Debug\TicTacToe.exe.config
+E:\various homework\人工智能\TicTacToe\bin\Debug\TicTacToe.exe
+E:\various homework\人工智能\TicTacToe\bin\Debug\TicTacToe.pdb
+E:\various homework\人工智能\TicTacToe\obj\Debug\TicTacToe.TicTacToe.resources
+E:\various homework\人工智能\TicTacToe\obj\Debug\TicTacToe.Properties.Resources.resources
+E:\various homework\人工智能\TicTacToe\obj\Debug\TicTacToe.csproj.GenerateResource.Cache
+E:\various homework\人工智能\TicTacToe\obj\Debug\TicTacToe.csproj.CoreCompileInputs.cache
+E:\various homework\人工智能\TicTacToe\obj\Debug\TicTacToe.exe
+E:\various homework\人工智能\TicTacToe\obj\Debug\TicTacToe.pdb
