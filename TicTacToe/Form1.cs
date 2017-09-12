@@ -1,27 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace TicTacToe
 {
-    public partial class Form1 : Form
+	public partial class Form1 : Form
     {
-        private struct Point
-        {
-            int x, y;
-        }
+        private int[] isClick;//isClick[i]是button(i + 1)的状态
+		private int iPlayStatus;//iPlayerStatus是当前游戏状态，1为人人对战，2为人机电脑先手，3为人机人先手
+		private bool player;//player用来判断人人对战时现在轮到第几个玩家
 
-        private int[] isClick;
-        private int iPlayStatus;
-        private bool player;
-        private const bool onTheOffensive = true;
-        public Form1()
+		private const bool onTheOffensive = true;//先手玩家
+		private const int Player1 = 1;
+		private const int Player2 = 4;
+		private const int Draw = 3;//和局状态的表示
+
+		public Form1()
         {
             InitializeComponent();
             isClick = new int[9];
@@ -30,22 +23,21 @@ namespace TicTacToe
             pictureBox1.Image = player ? Properties.Resources.player1 : Properties.Resources.player2;
         }
 
+		//电脑下棋函数
         private void Computer()
         {
-            int i, max, maxi;
+            int i, max = -2, maxi = -1;
 			Button btn;
-            max = -2;
-            maxi = -1;
             for(i = 0; i < 9; ++i)
                 if(isClick[i] == 0)
                 {
                     int tmp;
-                    isClick[i] = 4;
-					if (WinnerCheck(false) == 4) tmp = 1;
+                    isClick[i] = Player2;
+					if (WinnerCheck(false) == Player2) tmp = 1;
 					else
-					if (WinnerCheck(false) == 3) tmp = 0;
+					if (WinnerCheck(false) == Draw) tmp = 0;
 					else
-                    tmp = -dfs(false);
+                    tmp = -Dfs(false);
 					//Console.Write((i + 1).ToString() + ":" + tmp.ToString() + " ");
                     if(tmp > max)
                     {
@@ -94,13 +86,16 @@ namespace TicTacToe
 			isClick[maxi] = 4;
 		}
 
-        private int dfs(bool isComputer)
+		//极小极大搜索，1表示必胜态，0表示和局态，-1表示必败态
+        private int Dfs(bool isComputer)
         {
             int max = -1, i, now;
-            bool mustPut, isTrace;
+            bool mustPut, isDraw;
             mustPut = false;
-			isTrace = false;
-            if (isComputer) now = 4; else now = 1;
+			isDraw = false;
+            if (isComputer) now = Player2; else now = Player1;
+
+			//搜索终止条件，下一步必胜或已经和局
             for(i = 0; i < 9; ++i)
                 if(isClick[i] == 0)
                 {
@@ -113,20 +108,20 @@ namespace TicTacToe
                     }else
 					if(WinnerCheck(false) == 3)
 					{
-						isTrace = true;
+						isDraw = true;
 						isClick[i] = 0;
 						break;
 					}
                     isClick[i] = 0;
                 }
             if (mustPut) return 1;
-			if (isTrace) return 0;
-			max = -1;
+			if (isDraw) return 0;
+
 			for(i = 0; i < 9; ++i)
 				if(isClick[i] == 0)
 				{
 					isClick[i] = now;
-					max = Math.Max(max, -dfs(!isComputer));
+					max = Math.Max(max, -Dfs(!isComputer));
 					isClick[i] = 0;
 				}
             return max;
@@ -134,65 +129,64 @@ namespace TicTacToe
 
         private int WinnerCheck(bool changeStatus)
         {
-            int Winner;
-            int sum;
+            int Winner = 0, sum, i;
             bool bIsClick;
-            int i;
-            Winner = 0;
-            sum = 0;
 
             sum = isClick[0] + isClick[1] + isClick[2];
-            if(sum == 3)Winner = 1;
+            if (sum == 3)Winner = Player1;
             else
-            if(sum == 12)Winner = 4;
+            if (sum == 12)Winner = Player2;
 
             sum = isClick[0] + isClick[4] + isClick[8];
-            if(sum == 3)Winner = 1;
+            if (sum == 3)Winner = Player1;
             else
-            if(sum == 12) Winner = 4;
+            if (sum == 12) Winner = Player2;
 
             sum = isClick[0] + isClick[3] + isClick[6];
-            if (sum == 3) Winner = 1;
+            if (sum == 3) Winner = Player1;
             else
-            if (sum == 12) Winner = 4;
+            if (sum == 12) Winner = Player2;
 
             sum = isClick[2] + isClick[5] + isClick[8];
-            if (sum == 3) Winner = 1;
+            if (sum == 3) Winner = Player1;
             else
-            if (sum == 12) Winner = 4;
+            if (sum == 12) Winner = Player2;
 
             sum = isClick[2] + isClick[4] + isClick[6];
-            if (sum == 3) Winner = 1;
+            if (sum == 3) Winner = Player1;
             else
-            if (sum == 12) Winner = 4;
+            if (sum == 12) Winner = Player2;
 
             sum = isClick[3] + isClick[4] + isClick[5];
-            if (sum == 3) Winner = 1;
+            if (sum == 3) Winner = Player1;
             else
-            if (sum == 12) Winner = 4;
+            if (sum == 12) Winner = Player2;
 
             sum = isClick[1] + isClick[4] + isClick[7];
-            if (sum == 3) Winner = 1;
+            if (sum == 3) Winner = Player1;
             else
-            if (sum == 12) Winner = 4;
+            if (sum == 12) Winner = Player2;
 
             sum = isClick[6] + isClick[7] + isClick[8];
-            if (sum == 3) Winner = 1;
+            if (sum == 3) Winner = Player1;
             else
-            if (sum == 12) Winner = 4;
+            if (sum == 12) Winner = Player2;
 
             bIsClick = true;
+			/*Console.WriteLine(isClick[0] + " " + isClick[1] + " " + isClick[2] + " " 
+				+ isClick[3] + " " + isClick[4] + " " + isClick[5] + " " 
+				+ isClick[6] + " " + isClick[7] + " " + isClick[8]);*/
             for(i = 0; i < 9; ++i)
                 if (isClick[i] == 0)
                 {
                     bIsClick = false;
                     break;
                 }
-            if (bIsClick)
+            if (bIsClick && Winner == 0)
             {
                 if (changeStatus)
                 {
-                    label2.Text = "Trace!";
+                    label2.Text = "Draw!";
                     pictureBox1.Image = null;
                     button1.Enabled = false;
                     button2.Enabled = false;
@@ -204,14 +198,14 @@ namespace TicTacToe
                     button8.Enabled = false;
                     button7.Enabled = false;
                 }
-                return 3;
+                return Draw;
             }
 
             if (Winner != 0)
             {
                 if (changeStatus)
                 {
-                    label2.Text = "Winner :" + (Winner == 1 ? "×" : "○");
+                    label2.Text = "Winner :" + (Winner == Player1 ? "×" : "○");
                     pictureBox1.Image = null;
                     button1.Enabled = false;
                     button2.Enabled = false;
@@ -234,15 +228,15 @@ namespace TicTacToe
             button.Enabled = false;
             if (player)
             {
-                isClick[button.Name[6] - '1'] = 1;
+                isClick[button.Name[6] - '1'] = Player1;
                 button.Image = Properties.Resources.player1;
                 pictureBox1.Image = Properties.Resources.player2;
                 if (iPlayStatus == 1) player = !player;else
-                if (WinnerCheck(true) != 3)Computer();
+                if (WinnerCheck(true) != Draw)Computer();
             }
             else
             {
-                isClick[button.Name[6] - '1'] = 4;
+                isClick[button.Name[6] - '1'] = Player2;
                 button.Image = Properties.Resources.player2;
                 pictureBox1.Image = Properties.Resources.player1;
                 player = !player;
@@ -250,7 +244,7 @@ namespace TicTacToe
             WinnerCheck(true);
         }
 
-        private void refresh()
+        private void ReFresh()
         {
             Array.Clear(isClick, 0, 9);
             player = onTheOffensive;
@@ -275,19 +269,21 @@ namespace TicTacToe
             button7.Image = null;
         }
 
-        private void ReFresh(object sender, EventArgs e)
+        private void REFRESH(object sender, EventArgs e)
         {
-            refresh();
+            ReFresh();
         }
 
-        private void playStatus(object sender, EventArgs e)
+        private void PlayStatus(object sender, EventArgs e)
         {
             RadioButton rbt = (RadioButton)sender;
             if (rbt.Checked == true) iPlayStatus = (int)rbt.Tag;
-            refresh();
+            ReFresh();
+
+			//电脑先手直接下中间格子
             if (iPlayStatus == 2)
             {
-                isClick[4] = 4;
+                isClick[4] = Player2;
                 button5.Image = Properties.Resources.player2;
 				button5.Enabled = false;
                 pictureBox1.Image = Properties.Resources.player1;

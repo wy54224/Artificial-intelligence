@@ -84,7 +84,7 @@
 			this.button10.TabIndex = 12;
 			this.button10.Text = "重新开始";
 			this.button10.UseVisualStyleBackColor = true;
-			this.button10.Click += new System.EventHandler(this.ReFresh);
+			this.button10.Click += new System.EventHandler(this.REFRESH);
 			// 
 			// radioButton1
 			// 
@@ -99,7 +99,7 @@
 			this.radioButton1.Tag = 1;
 			this.radioButton1.Text = "人人对战";
 			this.radioButton1.UseVisualStyleBackColor = true;
-			this.radioButton1.CheckedChanged += new System.EventHandler(this.playStatus);
+			this.radioButton1.CheckedChanged += new System.EventHandler(this.PlayStatus);
 			// 
 			// radioButton2
 			// 
@@ -112,7 +112,7 @@
 			this.radioButton2.Tag = 2;
 			this.radioButton2.Text = "电脑先手";
 			this.radioButton2.UseVisualStyleBackColor = true;
-			this.radioButton2.CheckedChanged += new System.EventHandler(this.playStatus);
+			this.radioButton2.CheckedChanged += new System.EventHandler(this.PlayStatus);
 			// 
 			// radioButton3
 			// 
@@ -125,7 +125,7 @@
 			this.radioButton3.Tag = 3;
 			this.radioButton3.Text = "人先手";
 			this.radioButton3.UseVisualStyleBackColor = true;
-			this.radioButton3.CheckedChanged += new System.EventHandler(this.playStatus);
+			this.radioButton3.CheckedChanged += new System.EventHandler(this.PlayStatus);
 			// 
 			// button9
 			// 
