@@ -288,9 +288,9 @@ namespace TicTacToe
             if (iPlayStatus == 2)
             {
                 isClick[4] = 4;
-                button5.Image = Properties.Resources.player1;
+                button5.Image = Properties.Resources.player2;
 				button5.Enabled = false;
-                pictureBox1.Image = Properties.Resources.player2;
+                pictureBox1.Image = Properties.Resources.player1;
             }
         }
     }
