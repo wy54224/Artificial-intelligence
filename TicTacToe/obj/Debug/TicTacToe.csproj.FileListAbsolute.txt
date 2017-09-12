@@ -17,3 +17,12 @@ E:\various homework\AI\TicTacToe\bin\Debug\TicTacToe.exe.config
 E:\various homework\AI\TicTacToe\bin\Debug\TicTacToe.exe
 E:\various homework\AI\TicTacToe\bin\Debug\TicTacToe.pdb
 E:\various homework\AI\TicTacToe\obj\Debug\TicTacToe.Form1.resources
+C:\Users\Administrator\Desktop\Artificial-intelligence-master\TicTacToe\bin\Debug\TicTacToe.exe.config
+C:\Users\Administrator\Desktop\Artificial-intelligence-master\TicTacToe\bin\Debug\TicTacToe.exe
+C:\Users\Administrator\Desktop\Artificial-intelligence-master\TicTacToe\bin\Debug\TicTacToe.pdb
+C:\Users\Administrator\Desktop\Artificial-intelligence-master\TicTacToe\obj\Debug\TicTacToe.csprojResolveAssemblyReference.cache
+C:\Users\Administrator\Desktop\Artificial-intelligence-master\TicTacToe\obj\Debug\TicTacToe.Form1.resources
+C:\Users\Administrator\Desktop\Artificial-intelligence-master\TicTacToe\obj\Debug\TicTacToe.Properties.Resources.resources
+C:\Users\Administrator\Desktop\Artificial-intelligence-master\TicTacToe\obj\Debug\TicTacToe.csproj.GenerateResource.Cache
+C:\Users\Administrator\Desktop\Artificial-intelligence-master\TicTacToe\obj\Debug\TicTacToe.exe
+C:\Users\Administrator\Desktop\Artificial-intelligence-master\TicTacToe\obj\Debug\TicTacToe.pdb
