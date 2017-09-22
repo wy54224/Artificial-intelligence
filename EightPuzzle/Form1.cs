@@ -17,26 +17,26 @@ namespace EightPuzzle
 		//优先队列
 		private class PriorityQueue<T> where T : IComparable<T>
 		{
-			private ArrayList maxheap;
+			private ArrayList minHeap;
 
 			public PriorityQueue()
 			{
-				maxheap = new ArrayList();
+				minHeap = new ArrayList();
 			}
 
 			public void Add(T node)
 			{
-				maxheap.Add(node);
-				int x = maxheap.Count - 1, dad;
+				minHeap.Add(node);
+				int x = minHeap.Count - 1, dad;
 				object tmp = default(T);
 				while (x > 0)
 				{
 					dad = (x - 1) >> 1;
-					if (((T)maxheap[x]).CompareTo((T)maxheap[dad]) < 0)
+					if (((T)minHeap[x]).CompareTo((T)minHeap[dad]) < 0)
 					{
-						tmp = maxheap[x];
-						maxheap[x] = maxheap[dad];
-						maxheap[dad] = tmp;
+						tmp = minHeap[x];
+						minHeap[x] = minHeap[dad];
+						minHeap[dad] = tmp;
 					}
 					else
 						break;
@@ -46,36 +46,36 @@ namespace EightPuzzle
 
 			public bool Empty()
 			{
-				return maxheap.Count <= 0;
+				return minHeap.Count <= 0;
 			}
 
 			public T Pop()
 			{
-				T head = (T)maxheap[0];
+				T head = (T)minHeap[0];
 				int x, son, x1 = 0;
 				object tmp = default(T);
-				maxheap[0] = maxheap[maxheap.Count - 1];
-				maxheap.RemoveAt(maxheap.Count - 1);
+				minHeap[0] = minHeap[minHeap.Count - 1];
+				minHeap.RemoveAt(minHeap.Count - 1);
 				do
 				{
 					x = x1;
 					son = (x << 1) + 1;
-					if (son >= maxheap.Count) break;
-					if (((T)maxheap[x]).CompareTo((T)maxheap[son]) > 0)
+					if (son >= minHeap.Count) break;
+					if (((T)minHeap[x]).CompareTo((T)minHeap[son]) > 0)
 					{
 						x1 = son;
-						tmp = maxheap[x];
-						maxheap[x] = maxheap[son];
-						maxheap[son] = tmp;
+						tmp = minHeap[x];
+						minHeap[x] = minHeap[son];
+						minHeap[son] = tmp;
 					}
 					++son;
-					if (son >= maxheap.Count) break;
-					if (((T)maxheap[x]).CompareTo((T)maxheap[son]) > 0)
+					if (son >= minHeap.Count) break;
+					if (((T)minHeap[x]).CompareTo((T)minHeap[son]) > 0)
 					{
 						x1 = son;
-						tmp = maxheap[x];
-						maxheap[x] = maxheap[son];
-						maxheap[son] = tmp;
+						tmp = minHeap[x];
+						minHeap[x] = minHeap[son];
+						minHeap[son] = tmp;
 					}
 				} while (x < x1);
 				return head;
@@ -93,6 +93,7 @@ namespace EightPuzzle
 		private int grayBlockPosition;//灰色格子的位置
 		private PictureBox[] picBox;
 		private Point[] position;//每个格子的位置
+		private bool isRecieveKeyboard;//是否接收键盘消息
 
 		public Form1()
 		{
@@ -138,6 +139,7 @@ namespace EightPuzzle
 			eachLatticeSize = tmpSize;
 			eachLatticeSize.Width /= mapLength;
 			eachLatticeSize.Height /= mapLength;
+			isRecieveKeyboard = true;
 			bit = new Bitmap(bit, tmpSize);
 			mapSize = mapLength * mapLength;
 			num = new int[mapSize];
@@ -211,6 +213,7 @@ namespace EightPuzzle
 
 		private void MoveGrayBlock(object sender, KeyEventArgs e)
 		{
+			if (!isRecieveKeyboard) return;
 			switch (e.KeyCode)
 			{
 				case Keys.W:
@@ -424,6 +427,7 @@ namespace EightPuzzle
 				aim = tmpBlockStatus.pre;
 			}
 
+			isRecieveKeyboard = false;
 			num.CopyTo(rev, 0);
 			do
 			{
@@ -435,7 +439,6 @@ namespace EightPuzzle
 					}));
 
 				nowGrayBlockPosition = grayBlockPosition;
-				num.CopyTo(rev, 0);
 				for (int i = ans.Count - 2; i >= 0; --i)
 				{
 					switch (ans[i])
@@ -469,6 +472,7 @@ namespace EightPuzzle
 				{
 					picBox[num[i]].Location = position[i];
 				}));
+			isRecieveKeyboard = true;
 		}
 
 		private void Swap<T>(ref T v1, ref T v2)
