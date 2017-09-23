@@ -267,6 +267,14 @@ namespace TicTacToe
             button8.Image = null;
             button7.Enabled = true;
             button7.Image = null;
+            label2.Text = " ";
+            if (iPlayStatus == 2)
+            {
+                isClick[4] = Player2;
+                button5.Image = Properties.Resources.player2;
+                button5.Enabled = false;
+                pictureBox1.Image = Properties.Resources.player1;
+            }
         }
 
         private void REFRESH(object sender, EventArgs e)

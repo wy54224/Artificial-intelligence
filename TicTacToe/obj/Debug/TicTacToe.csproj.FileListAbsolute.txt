@@ -26,3 +26,12 @@ C:\Users\Administrator\Desktop\Artificial-intelligence-master\TicTacToe\obj\Debu
 C:\Users\Administrator\Desktop\Artificial-intelligence-master\TicTacToe\obj\Debug\TicTacToe.csproj.GenerateResource.Cache
 C:\Users\Administrator\Desktop\Artificial-intelligence-master\TicTacToe\obj\Debug\TicTacToe.exe
 C:\Users\Administrator\Desktop\Artificial-intelligence-master\TicTacToe\obj\Debug\TicTacToe.pdb
+D:\1大三上学习\人工智能实验\实验一_井字棋\Artificial-intelligence-master\Artificial-intelligence-master\TicTacToe\bin\Debug\TicTacToe.exe.config
+D:\1大三上学习\人工智能实验\实验一_井字棋\Artificial-intelligence-master\Artificial-intelligence-master\TicTacToe\obj\Debug\TicTacToe.exe
+D:\1大三上学习\人工智能实验\实验一_井字棋\Artificial-intelligence-master\Artificial-intelligence-master\TicTacToe\obj\Debug\TicTacToe.pdb
+D:\1大三上学习\人工智能实验\实验一_井字棋\Artificial-intelligence-master\Artificial-intelligence-master\TicTacToe\bin\Debug\TicTacToe.exe
+D:\1大三上学习\人工智能实验\实验一_井字棋\Artificial-intelligence-master\Artificial-intelligence-master\TicTacToe\bin\Debug\TicTacToe.pdb
+D:\1大三上学习\人工智能实验\实验一_井字棋\Artificial-intelligence-master\Artificial-intelligence-master\TicTacToe\obj\Debug\TicTacToe.csprojResolveAssemblyReference.cache
+D:\1大三上学习\人工智能实验\实验一_井字棋\Artificial-intelligence-master\Artificial-intelligence-master\TicTacToe\obj\Debug\TicTacToe.Form1.resources
+D:\1大三上学习\人工智能实验\实验一_井字棋\Artificial-intelligence-master\Artificial-intelligence-master\TicTacToe\obj\Debug\TicTacToe.Properties.Resources.resources
+D:\1大三上学习\人工智能实验\实验一_井字棋\Artificial-intelligence-master\Artificial-intelligence-master\TicTacToe\obj\Debug\TicTacToe.csproj.GenerateResource.Cache
