@@ -113,7 +113,6 @@ namespace EightPuzzle
 			else
 				picBox[index].BackColor = Color.LightGray;
 			picBox[index].Location = point;
-			picBox[index].Name = "MyButton" + num.ToString();
 			picBox[index].Size = new Size(eachLatticeSize.Width - 1, eachLatticeSize.Height - 1);
 			picBox[index].TabStop = false;
 			((System.ComponentModel.ISupportInitialize)(picBox[index])).EndInit();
@@ -218,15 +217,15 @@ namespace EightPuzzle
 			{
 				case Keys.W:
 				case Keys.Up:
-					if(grayBlockPosition > 2)
+					if(grayBlockPosition >= mapLength)
 					{
-						ChangePosition(grayBlockPosition, grayBlockPosition - 3);
-						grayBlockPosition -= 3;
+						ChangePosition(grayBlockPosition, grayBlockPosition - mapLength);
+						grayBlockPosition -= mapLength;
 					}
 					break;
 				case Keys.A:
 				case Keys.Left:
-					if (grayBlockPosition % 3 > 0)
+					if (grayBlockPosition % mapLength > 0)
 					{
 						ChangePosition(grayBlockPosition, grayBlockPosition - 1);
 						grayBlockPosition -= 1;
@@ -234,15 +233,15 @@ namespace EightPuzzle
 					break;
 				case Keys.S:
 				case Keys.Down:
-					if (grayBlockPosition < 6)
+					if (grayBlockPosition < mapSize - mapLength)
 					{
-						ChangePosition(grayBlockPosition, grayBlockPosition + 3);
-						grayBlockPosition += 3;
+						ChangePosition(grayBlockPosition, grayBlockPosition + mapLength);
+						grayBlockPosition += mapLength;
 					}
 					break;
 				case Keys.D:
 				case Keys.Right:
-					if (grayBlockPosition % 3 < 2)
+					if (grayBlockPosition % mapLength < mapLength - 1)
 					{
 						ChangePosition(grayBlockPosition, grayBlockPosition + 1);
 						grayBlockPosition += 1;
@@ -310,7 +309,7 @@ namespace EightPuzzle
 		//任意两格子间的曼哈顿距离
 		private int Distance(int x, int y)
 		{
-			return Math.Abs(x % 3 - y % 3) + Math.Abs(x / 3 - y / 3);
+			return Math.Abs(x % mapLength - y % mapLength) + Math.Abs(x / mapLength - y / mapLength);
 		}
 
 		//当前状态到结果距离的估计函数（所有格子的曼哈顿距离之和）
@@ -372,19 +371,19 @@ namespace EightPuzzle
 				CantorReverse(now, rev);
 				//Console.WriteLine(rev.ToString());
 				//上
-				if(nowGrayBlockPosition > 2)
+				if(nowGrayBlockPosition >= mapLength)
 				{
-					Swap(ref rev[nowGrayBlockPosition], ref rev[nowGrayBlockPosition - 3]);
+					Swap(ref rev[nowGrayBlockPosition], ref rev[nowGrayBlockPosition - mapLength]);
 					tmpHash = Cantor(rev);
 					if (!hash.ContainsKey(tmpHash))
 					{
 						hash.Add(tmpHash, new BlockStatus(1, now));
-						queue.Add(new Node(nowDepth + 1, tmpHash, nowDepth + 1 + H(rev), nowGrayBlockPosition - 3));
+						queue.Add(new Node(nowDepth + 1, tmpHash, nowDepth + 1 + H(rev), nowGrayBlockPosition - mapLength));
 					}
-					Swap(ref rev[nowGrayBlockPosition], ref rev[nowGrayBlockPosition - 3]);
+					Swap(ref rev[nowGrayBlockPosition], ref rev[nowGrayBlockPosition - mapLength]);
 				}
 				//左
-				if (nowGrayBlockPosition % 3 > 0)
+				if (nowGrayBlockPosition % mapLength > 0)
 				{
 					Swap(ref rev[nowGrayBlockPosition], ref rev[nowGrayBlockPosition - 1]);
 					tmpHash = Cantor(rev);
@@ -396,19 +395,19 @@ namespace EightPuzzle
 					Swap(ref rev[nowGrayBlockPosition], ref rev[nowGrayBlockPosition - 1]);
 				}
 				//下
-				if (nowGrayBlockPosition < 6)
+				if (nowGrayBlockPosition < mapSize - mapLength)
 				{
-					Swap(ref rev[nowGrayBlockPosition], ref rev[nowGrayBlockPosition + 3]);
+					Swap(ref rev[nowGrayBlockPosition], ref rev[nowGrayBlockPosition + mapLength]);
 					tmpHash = Cantor(rev);
 					if (!hash.ContainsKey(tmpHash))
 					{
 						hash.Add(tmpHash, new BlockStatus(3, now));
-						queue.Add(new Node(nowDepth + 1, tmpHash, nowDepth + 1 + H(rev), nowGrayBlockPosition + 3));
+						queue.Add(new Node(nowDepth + 1, tmpHash, nowDepth + 1 + H(rev), nowGrayBlockPosition + mapLength));
 					}
-					Swap(ref rev[nowGrayBlockPosition], ref rev[nowGrayBlockPosition + 3]);
+					Swap(ref rev[nowGrayBlockPosition], ref rev[nowGrayBlockPosition + mapLength]);
 				}
 				//右
-				if (nowGrayBlockPosition % 3 < 2)
+				if (nowGrayBlockPosition % mapLength < mapLength - 1)
 				{
 					Swap(ref rev[nowGrayBlockPosition], ref rev[nowGrayBlockPosition + 1]);
 					tmpHash = Cantor(rev);
@@ -421,7 +420,8 @@ namespace EightPuzzle
 				}
 			}
 
-			while (hash.TryGetValue(aim, out BlockStatus tmpBlockStatus))
+			BlockStatus tmpBlockStatus;
+			while (hash.TryGetValue(aim, out tmpBlockStatus))
 			{
 				ans.Add(tmpBlockStatus.direction);
 				aim = tmpBlockStatus.pre;
@@ -444,16 +444,16 @@ namespace EightPuzzle
 					switch (ans[i])
 					{
 						case 1:
-							ChangePosition(nowGrayBlockPosition, nowGrayBlockPosition - 3);
-							nowGrayBlockPosition -= 3;
+							ChangePosition(nowGrayBlockPosition, nowGrayBlockPosition - mapLength);
+							nowGrayBlockPosition -= mapLength;
 							break;
 						case 2:
 							ChangePosition(nowGrayBlockPosition, nowGrayBlockPosition - 1);
 							nowGrayBlockPosition -= 1;
 							break;
 						case 3:
-							ChangePosition(nowGrayBlockPosition, nowGrayBlockPosition + 3);
-							nowGrayBlockPosition += 3;
+							ChangePosition(nowGrayBlockPosition, nowGrayBlockPosition + mapLength);
+							nowGrayBlockPosition += mapLength;
 							break;
 						case 4:
 							ChangePosition(nowGrayBlockPosition, nowGrayBlockPosition + 1);
