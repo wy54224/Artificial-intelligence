@@ -10,4 +10,4 @@
 * ### [TSP问题](https://github.com/wy54224/Artificial-intelligence/blob/master/TSP)
   * 爬山法
   * 模拟退火
-  * 动态实现这些算法的过程
+  * 动态显示这些算法的过程
