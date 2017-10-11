@@ -82,7 +82,8 @@ namespace TSP
                 pointf[i].Y = point[i].Y / scaleRateY;
             }
             int[] aimRoute = new int[pointList.Count];
-            PointF[] aimPath = new PointF[pointList.Count];
+            PointF[] aimPathf = new PointF[pointList.Count];
+			Point[] aimPath = new Point[pointList.Count];
             int count = 0;
             using (StreamReader srr = File.OpenText(textBox2.Text))
             {
@@ -93,17 +94,20 @@ namespace TSP
                     for (int i = 0; i < Line.Length; ++i)
                         if (Line[i] >= '0' && Line[i] <= '9')
                             tmp = tmp * 10 + Line[i] - '0';
-                    aimPath[count] = pointf[tmp - 1];
+                    aimPathf[count] = pointf[tmp - 1];
+					aimPath[count] = point[tmp - 1];
                     aimRoute[count++] = tmp;
                 }
                 srr.Close();
             }
 
+			label2.Text = GetDis(aimPath).ToString();
+
             using (Graphics ga = Graphics.FromImage(aim))
             {
                 using(GraphicsPath gpa = new GraphicsPath())
                 {
-                    gpa.AddPolygon(aimPath);
+                    gpa.AddPolygon(aimPathf);
                     ga.DrawPath(new Pen(Color.Black) { Width = 2 }, gpa);
 					pictureBox2.Invalidate();
                 }
@@ -111,8 +115,13 @@ namespace TSP
 
             new Thread((ThreadStart)delegate
             {
-                HillClimbing(point, pointf);
-            }) { IsBackground = true }.Start();
+				//HillClimbing(point, pointf);
+				SA(point, pointf);
+				Invoke((EventHandler)delegate
+				{
+					button1.Enabled = true;
+				});
+			}) { IsBackground = true }.Start();
         }
 
         void Randomization(ref PointF[] pointf, ref Point[] point)
@@ -150,10 +159,9 @@ namespace TSP
             rsh = tmp;
         }
 
-        private const int loopTime = 400000;
+        private const int loopTime = 800000;
         void HillClimbing(Point[] point, PointF[] pointf)
         {
-			Thread.Sleep(10);
             Randomization(ref pointf, ref point);
 
 			double now = GetDis(point), tmp;
@@ -175,6 +183,8 @@ namespace TSP
 				if (tmp < now)
 				{
 					now = tmp;
+					while (isBlock)
+						Thread.Sleep(1);
 					isBlock = true;
 					new Thread((ThreadStart)delegate {
 						try
@@ -205,13 +215,141 @@ namespace TSP
 					Swap(ref point[x], ref point[y]);
 					Swap(ref pointf[x], ref pointf[y]);
 				}
-				if (isBlock)
-					Thread.Sleep(10);
             }
             Invoke((EventHandler)delegate
             {
                 button1.Enabled = true;
             });
         }
+
+		const double T = 150, delta = 0.99;
+		const int SALoop = 15000;
+		const int Limit = SALoop / 5;
+		const int BLimit = SALoop / 15;
+		void SA(Point[] point, PointF[] pointf)
+		{
+			Randomization(ref pointf, ref point);
+
+			double now = GetDis(point), tmp, t = T, de, best;
+			PointF[] bestPath = new PointF[pointf.Length];
+			Random ro = new Random();
+			bool isBlock = false, isChange;
+			int x, y, l1 = 0, l2 = 0;
+			best = now;
+
+			while(true)
+			{
+				Invoke((EventHandler)delegate
+				{
+					label1.Text = t.ToString();
+				});
+				for(int i = 0; i < SALoop; ++i)
+				{
+					do
+					{
+						x = ro.Next(point.Length);
+						y = ro.Next(point.Length);
+					} while (x == y);
+
+					Swap(ref point[x], ref point[y]);
+					Swap(ref pointf[x], ref pointf[y]);
+					tmp = GetDis(point);
+					de = now - tmp;
+					isChange = false;
+					if (de >= 0)
+					{
+						now = tmp;
+						isChange = true;
+						l1 = 0;
+						l2 = 0;
+						if (tmp < best)
+						{
+							best = tmp;
+							pointf.CopyTo(bestPath, 0);
+						}
+					}
+					else
+					{
+						if (Math.Exp(de / t) > ro.Next() / (double)System.Int32.MaxValue && Math.Exp(de / t) < 1)
+						{
+							now = tmp;
+							isChange = true;
+						}
+						else
+						{
+							Swap(ref point[x], ref point[y]);
+							Swap(ref pointf[x], ref pointf[y]);
+						}
+						++l1;
+					}
+					if (isChange)
+					{
+						while (isBlock)
+							Thread.Sleep(1);
+						isBlock = true;
+						new Thread((ThreadStart)delegate {
+							try
+							{
+								Invoke((EventHandler)delegate {
+									label3.Text = now.ToString();
+									if (origin != null) origin.Dispose();
+									origin = new Bitmap(picBoxWidth, picBoxHeight);
+									using (Graphics go = Graphics.FromImage(origin))
+									{
+										using (GraphicsPath gpo = new GraphicsPath())
+										{
+											gpo.AddPolygon(pointf);
+											go.DrawPath(new Pen(Color.Black) { Width = 2 }, gpo);
+											pictureBox1.Image = origin;
+										}
+									}
+								});
+							}
+							catch
+							{
+								return;
+							}
+							isBlock = false;
+						}).Start();
+					}
+					if(l1 > Limit)
+					{
+						++l2;
+						break;
+					}
+				}
+				if (l2 > BLimit)
+					break;
+				t *= delta;
+			}
+
+			while (isBlock)
+				Thread.Sleep(1);
+			isBlock = true;
+			new Thread((ThreadStart)delegate {
+				try
+				{
+					Invoke((EventHandler)delegate {
+						label3.Text = best.ToString();
+						if (origin != null) origin.Dispose();
+						origin = new Bitmap(picBoxWidth, picBoxHeight);
+						using (Graphics go = Graphics.FromImage(origin))
+						{
+							using (GraphicsPath gpo = new GraphicsPath())
+							{
+								gpo.AddPolygon(bestPath);
+								go.DrawPath(new Pen(Color.Black) { Width = 2 }, gpo);
+								pictureBox1.Image = origin;
+							}
+						}
+					});
+				}
+				catch
+				{
+					return;
+				}
+				isBlock = false;
+			}).Start();
+		}
     }
 }
