@@ -11,10 +11,18 @@ namespace TSP
     public partial class Form1 : Form
     {
         private Bitmap origin, aim;
-        private String pointFileName = "att48.tsp", routeFileName = "att48.opt.tour";
+		//初始输入文件名
+        private String pointFileName = "eil101.tsp", routeFileName = "eil101.opt.tour";
         private int mapSize, picBoxWidth ,picBoxHeight;
+		//opt数组分别存放3种操作的使用次数（使用次数越大越容易被选择来用，初始值为optInitialValue）
+		private const int optInitialValue = 500;
+		private int[] opt = new int[3];
+		//全局Random变量（解决new Random()过快生成数据不随机的问题----Random()默认构造函数用时间当seed）
+		Random ro = new Random();
+		//开始时间
+		DateTime start;
 
-        public Form1()
+		public Form1()
         {
             InitializeComponent();
             textBox1.Text = pointFileName;
@@ -25,8 +33,16 @@ namespace TSP
 
         private void Start(object sender, EventArgs e)
         {
+			start = DateTime.Now;
             button1.Enabled = false;
-            if (!File.Exists(textBox1.Text))
+			label1.Text = "";
+			label2.Text = "";
+			label3.Text = "";
+			label8.Text = "";
+			mapSize = 0;
+			for (int i = 0; i < opt.Length; ++i) opt[i] = optInitialValue;
+			//文件存在性检测
+			if (!File.Exists(textBox1.Text))
             {
                 MessageBox.Show(textBox1.Text + " does not exist.");
                 return;
@@ -36,8 +52,9 @@ namespace TSP
                 MessageBox.Show(textBox2.Text + " does not exist.");
                 return;
             }
-            mapSize = 0;
-            List<Point> pointList = new List<Point>();
+
+			//读入文件并存储得到的数据到pointList中
+			List<Point> pointList = new List<Point>();
             using (StreamReader srp = File.OpenText(textBox1.Text))
             {
                 String Line;
@@ -69,18 +86,22 @@ namespace TSP
                 srp.Close();
             }
             mapSize += 10;
+			//图像文件的创建
             if(origin != null)origin.Dispose();
             if(aim != null)aim.Dispose();
             aim = new Bitmap(picBoxWidth, picBoxHeight);
             pictureBox2.Image = aim;
 
+			//将前面得到的list转化为数组，pointf为实际绘图的坐标点（和原坐标存在等比例关系）
             Point[] point = pointList.ToArray();
             PointF[] pointf = new PointF[point.Length];
-            float scaleRateX = mapSize / (float)picBoxWidth, scaleRateY = mapSize / (float)picBoxHeight;
+			//mapSize 地图坐标的最大值+10， picBoxWidth和picBoxHeight是Bitmap图像的宽高
+			float scaleRateX = mapSize / (float)picBoxWidth, scaleRateY = mapSize / (float)picBoxHeight;
             for (int i = 0; i < point.Length; ++i) {
                 pointf[i].X = point[i].X / scaleRateX;
                 pointf[i].Y = point[i].Y / scaleRateY;
             }
+			//存放给出的TSP最优解样例
             int[] aimRoute = new int[pointList.Count];
             PointF[] aimPathf = new PointF[pointList.Count];
 			Point[] aimPath = new Point[pointList.Count];
@@ -103,6 +124,7 @@ namespace TSP
 
 			label2.Text = GetDis(aimPath).ToString();
 
+			//将最优解画出来
             using (Graphics ga = Graphics.FromImage(aim))
             {
                 using(GraphicsPath gpa = new GraphicsPath())
@@ -113,37 +135,43 @@ namespace TSP
                 }
             }
 
+			//创建新线程执行解TSP的算法
             new Thread((ThreadStart)delegate
             {
-				//HillClimbing(point, pointf);
-				SA(point, pointf);
+				if(radioButton1.Checked)
+					HillClimbing(point, pointf);
+				else
+					SA(point, pointf);
 				Invoke((EventHandler)delegate
 				{
 					button1.Enabled = true;
+					TimeSpan tim = DateTime.Now - start;
+					label8.Text = "Run time=" + tim.TotalSeconds + "s";
 				});
 			}) { IsBackground = true }.Start();
         }
 
-        void Randomization(ref PointF[] pointf, ref Point[] point)
+		//点位置初始化的函数（随机连线）
+		void Randomization(ref PointF[] pointf, ref Point[] point)
         {
-            Random ro = new Random();
-            List<int> list = new List<int>();
-            Point[] tmp = new Point[point.Length];
-            PointF[] tmpf = new PointF[pointf.Length];
-            int i, index;
-            list.Clear();
-            for (i = 0; i < point.Length; ++i) list.Add(i);
-            for (i = 0; i < point.Length; ++i)
-            {
-                index = ro.Next(point.Length - i);
-                tmp[i] = point[list[index]];
-                tmpf[i] = pointf[list[index]];
-                list.RemoveAt(index);
-            }
-            tmp.CopyTo(point, 0);
-            tmpf.CopyTo(pointf, 0);
-        }
+			List<int> list = new List<int>();
+			Point[] tmp = new Point[point.Length];
+			PointF[] tmpf = new PointF[pointf.Length];
+			int i, index;
+			list.Clear();
+			for (i = 0; i < point.Length; ++i) list.Add(i);
+			for (i = 0; i < point.Length; ++i)
+			{
+				index = ro.Next(point.Length - i);
+				tmp[i] = point[list[index]];
+				tmpf[i] = pointf[list[index]];
+				list.RemoveAt(index);
+			}
+			tmp.CopyTo(point, 0);
+			tmpf.CopyTo(pointf, 0);
+		}
 
+		//获取当前遍历路径长
         double GetDis(Point[] point)
         {
             double tmp = Math.Sqrt(Math.Pow(point[0].X - point[point.Length - 1].X, 2) + Math.Pow(point[0].Y - point[point.Length - 1].Y, 2));
@@ -159,7 +187,54 @@ namespace TSP
             rsh = tmp;
         }
 
-        private const int loopTime = 800000;
+		//状态转移函数，包含3种操作
+		int GetNext(Point[] point, PointF[] pointf)
+		{
+			int x, y;
+			do
+			{
+				x = ro.Next(point.Length);
+				y = ro.Next(point.Length);
+			} while (x == y);
+
+			double ranRate = ro.Next(0) / (double)System.Int32.MaxValue, sum = opt[0] + opt[1] + opt[2];
+			//操作1：将区间[x, y]的点翻转
+			if (ranRate < opt[0] / sum)
+			{
+				if (x > y) Swap(ref x, ref y);
+				while (x < y)
+				{
+					Swap(ref point[x], ref point[y]);
+					Swap(ref pointf[x], ref pointf[y]);
+					++x;
+					--y;
+				}
+				return 0;
+			}
+			//操作2：交换两点
+			else
+			if (ranRate < (opt[0] + opt[1]) / sum)
+			{
+				Swap(ref point[x], ref point[y]);
+				Swap(ref pointf[x], ref pointf[y]);
+				return 1;
+			}
+			//操作3：将一点放到另一点的后面
+			else
+			{
+				if (x > y) Swap(ref x, ref y);
+				++x;
+				while(x < y)
+				{
+					Swap(ref point[x], ref point[y]);
+					Swap(ref pointf[x], ref pointf[y]);
+					++x;
+				}
+				return 2;
+			}
+		}
+
+		//爬山法
         void HillClimbing(Point[] point, PointF[] pointf)
         {
             Randomization(ref pointf, ref point);
@@ -167,29 +242,33 @@ namespace TSP
 			double now = GetDis(point), tmp;
             Random ro = new Random();
 			bool isBlock = false;
-            int x, y;
+			int x, y, l1 = 0, whichOpt;
+			Point[] tmpPoint = new Point[point.Length];
+			PointF[] tmpPointf = new PointF[pointf.Length];
 
-			for (int i = 0; i < loopTime; ++i)
+			while(true)
             {
-				do
-				{
-					x = ro.Next(point.Length);
-					y = ro.Next(point.Length);
-				} while (x == y);
-
-				Swap(ref point[x], ref point[y]);
-				Swap(ref pointf[x], ref pointf[y]);
+				point.CopyTo(tmpPoint, 0);
+				pointf.CopyTo(tmpPointf, 0);
+				whichOpt = GetNext(point, pointf);
+				
 				tmp = GetDis(point);
 				if (tmp < now)
 				{
+					++opt[whichOpt];
 					now = tmp;
+					//防止主线程绘图卡死
 					while (isBlock)
 						Thread.Sleep(1);
 					isBlock = true;
 					new Thread((ThreadStart)delegate {
+						//在运行过程中直接关闭Form1时Invoke仍会调用（background线程也没用）
+						//此时会抛出“无法访问已释放的对象”的异常（Form1对象Dispose了）
+						//一种不完全的解决方法，用try catch忽略掉错误
 						try
 						{
 							Invoke((EventHandler)delegate {
+								label3.Text = now.ToString();
 								if (origin != null) origin.Dispose();
 								origin = new Bitmap(picBoxWidth, picBoxHeight);
 								using (Graphics go = Graphics.FromImage(origin))
@@ -212,18 +291,21 @@ namespace TSP
 				}
 				else
 				{
-					Swap(ref point[x], ref point[y]);
-					Swap(ref pointf[x], ref pointf[y]);
+					tmpPoint.CopyTo(point, 0);
+					tmpPointf.CopyTo(pointf, 0);
+					++l1;
 				}
+				if (l1 > 100000)
+					break;
             }
-            Invoke((EventHandler)delegate
-            {
-                button1.Enabled = true;
-            });
-        }
+		}
 
-		const double T = 150, delta = 0.99;
+		//模拟退火（Simulated annealing algorithm）
+		//T 初始温度，delta降温系数，SALoop算法markov链长
+		const double T = 1.2, delta = 0.99;
 		const int SALoop = 15000;
+		//Limit为每个温度下运行最大的不降温结点数
+		//BLimit为允许的最大连续超出Limit的温度数量
 		const int Limit = SALoop / 5;
 		const int BLimit = SALoop / 15;
 		void SA(Point[] point, PointF[] pointf)
@@ -231,33 +313,39 @@ namespace TSP
 			Randomization(ref pointf, ref point);
 
 			double now = GetDis(point), tmp, t = T, de, best;
-			PointF[] bestPath = new PointF[pointf.Length];
-			Random ro = new Random();
+			PointF[] bestPathf = new PointF[pointf.Length];
+			Point[] bestPath = new Point[point.Length];
+			Point[] tmpPoint = new Point[point.Length];
+			PointF[] tmpPointf = new PointF[pointf.Length];
 			bool isBlock = false, isChange;
-			int x, y, l1 = 0, l2 = 0;
+			int l1 = 0, l2 = 0, whichOpt;
 			best = now;
 
 			while(true)
 			{
-				Invoke((EventHandler)delegate
-				{
-					label1.Text = t.ToString();
-				});
+				//显示当前温度
+				try{
+					Invoke((EventHandler)delegate
+					{
+						label1.Text = t.ToString();
+					});
+				}
+				catch{
+					return;
+				}
 				for(int i = 0; i < SALoop; ++i)
 				{
-					do
-					{
-						x = ro.Next(point.Length);
-						y = ro.Next(point.Length);
-					} while (x == y);
+					point.CopyTo(tmpPoint, 0);
+					pointf.CopyTo(tmpPointf, 0);
 
-					Swap(ref point[x], ref point[y]);
-					Swap(ref pointf[x], ref pointf[y]);
+					whichOpt = GetNext(point, pointf);
+
 					tmp = GetDis(point);
 					de = now - tmp;
 					isChange = false;
-					if (de >= 0)
+					if (de > 0)
 					{
+						++opt[whichOpt];
 						now = tmp;
 						isChange = true;
 						l1 = 0;
@@ -265,20 +353,21 @@ namespace TSP
 						if (tmp < best)
 						{
 							best = tmp;
-							pointf.CopyTo(bestPath, 0);
+							pointf.CopyTo(bestPathf, 0);
+							point.CopyTo(bestPath, 0);
 						}
 					}
 					else
 					{
-						if (Math.Exp(de / t) > ro.Next() / (double)System.Int32.MaxValue && Math.Exp(de / t) < 1)
+						if (Math.Exp(de / t) > ro.Next() / (double)System.Int32.MaxValue)
 						{
 							now = tmp;
 							isChange = true;
 						}
 						else
 						{
-							Swap(ref point[x], ref point[y]);
-							Swap(ref pointf[x], ref pointf[y]);
+							tmpPoint.CopyTo(point, 0);
+							tmpPointf.CopyTo(pointf, 0);
 						}
 						++l1;
 					}
@@ -287,6 +376,8 @@ namespace TSP
 						while (isBlock)
 							Thread.Sleep(1);
 						isBlock = true;
+						//这里可以改进：不用每次创建一个线程而是用一个线程每次唤醒它
+						//创建线程的原因：不用卡在Invoke而是继续执行
 						new Thread((ThreadStart)delegate {
 							try
 							{
@@ -320,9 +411,13 @@ namespace TSP
 				}
 				if (l2 > BLimit)
 					break;
+				//自己加的东西：每次在该温度下结束后用当前最优值覆盖当前值
+				bestPath.CopyTo(point, 0);
+				bestPathf.CopyTo(pointf, 0);
 				t *= delta;
 			}
 
+			//最后再把最优值输出
 			while (isBlock)
 				Thread.Sleep(1);
 			isBlock = true;
@@ -337,7 +432,7 @@ namespace TSP
 						{
 							using (GraphicsPath gpo = new GraphicsPath())
 							{
-								gpo.AddPolygon(bestPath);
+								gpo.AddPolygon(bestPathf);
 								go.DrawPath(new Pen(Color.Black) { Width = 2 }, gpo);
 								pictureBox1.Image = origin;
 							}
