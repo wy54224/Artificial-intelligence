@@ -11,6 +11,7 @@ namespace TSP
     public partial class Form1 : Form
     {
         private Bitmap origin, aim;
+		private double aimValue;
 		//初始输入文件名
         private String pointFileName = "eil101.tsp", routeFileName = "eil101.opt.tour";
         private int mapSize, picBoxWidth ,picBoxHeight;
@@ -122,7 +123,8 @@ namespace TSP
                 srr.Close();
             }
 
-			label2.Text = GetDis(aimPath).ToString();
+			aimValue = GetDis(aimPath);
+			label2.Text = aimValue.ToString();
 
 			//将最优解画出来
             using (Graphics ga = Graphics.FromImage(aim))
@@ -269,6 +271,7 @@ namespace TSP
 						{
 							Invoke((EventHandler)delegate {
 								label3.Text = now.ToString();
+								label9.Text = ((now - aimValue) / aimValue * 100).ToString("f2") + "%";
 								if (origin != null) origin.Dispose();
 								origin = new Bitmap(picBoxWidth, picBoxHeight);
 								using (Graphics go = Graphics.FromImage(origin))
@@ -383,6 +386,7 @@ namespace TSP
 							{
 								Invoke((EventHandler)delegate {
 									label3.Text = now.ToString();
+									label9.Text = ((now - aimValue) / aimValue * 100).ToString("f2") + "%";
 									if (origin != null) origin.Dispose();
 									origin = new Bitmap(picBoxWidth, picBoxHeight);
 									using (Graphics go = Graphics.FromImage(origin))
@@ -426,6 +430,7 @@ namespace TSP
 				{
 					Invoke((EventHandler)delegate {
 						label3.Text = best.ToString();
+						label9.Text = ((best - aimValue) / aimValue * 100).ToString("f2") + "%";
 						if (origin != null) origin.Dispose();
 						origin = new Bitmap(picBoxWidth, picBoxHeight);
 						using (Graphics go = Graphics.FromImage(origin))
