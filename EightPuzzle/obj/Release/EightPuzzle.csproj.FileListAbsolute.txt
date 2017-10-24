@@ -1,0 +1,10 @@
+E:\various homework\AI\EightPuzzle\bin\Release\EightPuzzle.exe.config
+E:\various homework\AI\EightPuzzle\bin\Release\EightPuzzle.exe
+E:\various homework\AI\EightPuzzle\bin\Release\EightPuzzle.pdb
+E:\various homework\AI\EightPuzzle\obj\Release\EightPuzzle.csprojResolveAssemblyReference.cache
+E:\various homework\AI\EightPuzzle\obj\Release\EightPuzzle.Form1.resources
+E:\various homework\AI\EightPuzzle\obj\Release\EightPuzzle.Properties.Resources.resources
+E:\various homework\AI\EightPuzzle\obj\Release\EightPuzzle.csproj.GenerateResource.Cache
+E:\various homework\AI\EightPuzzle\obj\Release\EightPuzzle.csproj.CoreCompileInputs.cache
+E:\various homework\AI\EightPuzzle\obj\Release\EightPuzzle.exe
+E:\various homework\AI\EightPuzzle\obj\Release\EightPuzzle.pdb

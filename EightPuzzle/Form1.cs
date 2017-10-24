@@ -24,6 +24,10 @@ namespace EightPuzzle
 				minHeap = new ArrayList();
 			}
 
+			public int Count {
+				get { return minHeap.Count; }
+			}
+
 			public void Add(T node)
 			{
 				minHeap.Add(node);
@@ -102,6 +106,7 @@ namespace EightPuzzle
 			Reset();
 			/*foreach (int t in num) Console.Write(t);
 			Console.WriteLine();*/
+		
 		}
 
 		//每个格子的初始属性设置
@@ -133,6 +138,7 @@ namespace EightPuzzle
 		private void Reset()
 		{
 			Size tmpSize = ClientSize;
+			tmpSize.Width >>= 1;
 			tmpSize.Width -= 3;
 			tmpSize.Height -= 3;
 			eachLatticeSize = tmpSize;
@@ -321,6 +327,14 @@ namespace EightPuzzle
 			return ans;
 		}
 
+		private int H1(int[] rev)
+		{
+			int ans = 0;
+			for (int i = 0; i < mapSize; ++i)
+				if (rev[i] != mapSize - 1 && rev[i] != i) ans += 1;
+			return ans;
+		}
+
 		//A*算法中存储每个状态信息的结构体
 		private class BlockStatus
 		{
@@ -351,34 +365,74 @@ namespace EightPuzzle
 			}
 		}
 
+		private String GetString(ref int[] num)
+		{
+			String tmp = "";
+			for (int i = 0; i < num.Length; ++i) tmp += num[i].ToString() + ' ';
+			return tmp;
+		}
+
 		//A*算法
 		private void A_Star()
 		{
 			List<int> ans = new List<int>();
+			int useNode = 0, nowF = 0;
 			Dictionary<int, BlockStatus> hash = new Dictionary<int, BlockStatus>();
 			PriorityQueue<Node> queue = new PriorityQueue<Node>();
 			int[] rev = new int[mapSize];
 			int now = Cantor(num), aim = Cantor(new int[9] { 0, 1, 2, 3, 4, 5, 6, 7, 8 }), nowDepth, nowGrayBlockPosition, tmpHash;
 			hash.Add(now, new BlockStatus(-1, -1));
-			queue.Add(new Node(0, now, H(num), grayBlockPosition));
+			if (radioButton1.Checked)
+			{
+				nowF = H(num);
+				queue.Add(new Node(0, now, H(num), grayBlockPosition));
+			}
+			else
+			{
+				nowF = H1(num);
+				queue.Add(new Node(0, now, H1(num), grayBlockPosition));
+			}
+			Invoke((EventHandler)delegate {
+				label4.Text = "True";
+				listBox1.Items.Add(GetString(ref num));
+				label1.Text = "Now: " + listBox1.Items[0].ToString() + " " + (radioButton1.Checked ? ("H1 = " + H(num)) : ("H2 = " + H1(num)));
+				label2.Text = "Open表元素数: 1";
+			});
 
 			while (!queue.Empty() && !hash.ContainsKey(aim))
 			{
+				++useNode;
 				Node tmp = queue.Pop();
 				now = tmp.now;
 				nowDepth = tmp.depth;
 				nowGrayBlockPosition = tmp.grayBlockPosition;
 				CantorReverse(now, rev);
+				Invoke((EventHandler)delegate {
+					if (tmp.value < nowF)
+						label4.Text = "False";
+					else
+						nowF = tmp.value;
+					String tmpStr = GetString(ref rev);
+					label1.Text = "Now: " + tmpStr + (radioButton1.Checked ? ("H1 = " + H(rev)) : ("H2 = " + H1(rev)));
+					label2.Text = "Open表元素数: " + queue.Count + " 总扩展节点数: " + (queue.Count + useNode);
+					listBox1.Items.Remove(tmpStr);
+				});
 				//Console.WriteLine(rev.ToString());
 				//上
-				if(nowGrayBlockPosition >= mapLength)
+				if (nowGrayBlockPosition >= mapLength)
 				{
 					Swap(ref rev[nowGrayBlockPosition], ref rev[nowGrayBlockPosition - mapLength]);
 					tmpHash = Cantor(rev);
 					if (!hash.ContainsKey(tmpHash))
 					{
 						hash.Add(tmpHash, new BlockStatus(1, now));
-						queue.Add(new Node(nowDepth + 1, tmpHash, nowDepth + 1 + H(rev), nowGrayBlockPosition - mapLength));
+						if(radioButton1.Checked)
+							queue.Add(new Node(nowDepth + 1, tmpHash, nowDepth + 1 + H(rev), nowGrayBlockPosition - mapLength));
+						else
+							queue.Add(new Node(nowDepth + 1, tmpHash, nowDepth + 1 + H1(rev), nowGrayBlockPosition - mapLength));
+						Invoke((EventHandler)delegate {
+							listBox1.Items.Add(GetString(ref rev));
+						});
 					}
 					Swap(ref rev[nowGrayBlockPosition], ref rev[nowGrayBlockPosition - mapLength]);
 				}
@@ -390,7 +444,13 @@ namespace EightPuzzle
 					if (!hash.ContainsKey(tmpHash))
 					{
 						hash.Add(tmpHash, new BlockStatus(2, now));
-						queue.Add(new Node(nowDepth + 1, tmpHash, nowDepth + 1 + H(rev), nowGrayBlockPosition - 1));
+						if(radioButton1.Checked)
+							queue.Add(new Node(nowDepth + 1, tmpHash, nowDepth + 1 + H(rev), nowGrayBlockPosition - 1));
+						else
+							queue.Add(new Node(nowDepth + 1, tmpHash, nowDepth + 1 + H1(rev), nowGrayBlockPosition - 1));
+						Invoke((EventHandler)delegate {
+							listBox1.Items.Add(GetString(ref rev));
+						});
 					}
 					Swap(ref rev[nowGrayBlockPosition], ref rev[nowGrayBlockPosition - 1]);
 				}
@@ -402,7 +462,13 @@ namespace EightPuzzle
 					if (!hash.ContainsKey(tmpHash))
 					{
 						hash.Add(tmpHash, new BlockStatus(3, now));
-						queue.Add(new Node(nowDepth + 1, tmpHash, nowDepth + 1 + H(rev), nowGrayBlockPosition + mapLength));
+						if(radioButton1.Checked)
+							queue.Add(new Node(nowDepth + 1, tmpHash, nowDepth + 1 + H(rev), nowGrayBlockPosition + mapLength));
+						else
+							queue.Add(new Node(nowDepth + 1, tmpHash, nowDepth + 1 + H1(rev), nowGrayBlockPosition + mapLength));
+						Invoke((EventHandler)delegate {
+							listBox1.Items.Add(GetString(ref rev));
+						});
 					}
 					Swap(ref rev[nowGrayBlockPosition], ref rev[nowGrayBlockPosition + mapLength]);
 				}
@@ -414,7 +480,13 @@ namespace EightPuzzle
 					if (!hash.ContainsKey(tmpHash))
 					{
 						hash.Add(tmpHash, new BlockStatus(4, now));
-						queue.Add(new Node(nowDepth + 1, tmpHash, nowDepth + 1 + H(rev), nowGrayBlockPosition + 1));
+						if(radioButton1.Checked)
+							queue.Add(new Node(nowDepth + 1, tmpHash, nowDepth + 1 + H(rev), nowGrayBlockPosition + 1));
+						else
+							queue.Add(new Node(nowDepth + 1, tmpHash, nowDepth + 1 + H1(rev), nowGrayBlockPosition + 1));
+						Invoke((EventHandler)delegate {
+							listBox1.Items.Add(GetString(ref rev));
+						});
 					}
 					Swap(ref rev[nowGrayBlockPosition], ref rev[nowGrayBlockPosition + 1]);
 				}
@@ -485,8 +557,8 @@ namespace EightPuzzle
 		private void GetHint(object sender, EventArgs e)
 		{
 			//A_Star();
-			Thread newThread = new Thread(A_Star);
-			newThread.IsBackground = true;
+			listBox1.Items.Clear();
+			Thread newThread = new Thread(A_Star){IsBackground = true};
 			newThread.Start();
 		}
 
