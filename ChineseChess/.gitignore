@@ -1,0 +1,7 @@
+#Description file
+*.docx
+
+#Visual Studio project file
+/.vs/*
+/obj/*
+/bin/*
