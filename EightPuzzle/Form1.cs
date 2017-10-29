@@ -98,12 +98,14 @@ namespace EightPuzzle
 		private PictureBox[] picBox;
 		private Point[] position;//每个格子的位置
 		private bool isRecieveKeyboard;//是否接收键盘消息
+		private bool isEightPuzzle;//要求8数码还是求9数码
 
 		public Form1()
 		{
 			InitializeComponent();
 			bit = Properties.Resources._2875;
 			Reset();
+			isEightPuzzle = true;
 			/*foreach (int t in num) Console.Write(t);
 			Console.WriteLine();*/
 		
@@ -375,6 +377,7 @@ namespace EightPuzzle
 		//A*算法
 		private void A_Star()
 		{
+			Random ro = new Random();
 			List<int> ans = new List<int>();
 			int useNode = 0, nowF = 0;
 			Dictionary<int, BlockStatus> hash = new Dictionary<int, BlockStatus>();
@@ -392,12 +395,15 @@ namespace EightPuzzle
 				nowF = H1(num);
 				queue.Add(new Node(0, now, H1(num), grayBlockPosition));
 			}
+			List<int> yData = new List<int>() { nowF };
 			Invoke((EventHandler)delegate {
+				chart1.Series[0].Points.DataBindY(yData);
 				label4.Text = "True";
 				listBox1.Items.Add(GetString(ref num));
 				label1.Text = "Now: " + listBox1.Items[0].ToString() + " " + (radioButton1.Checked ? ("H1 = " + H(num)) : ("H2 = " + H1(num)));
 				label2.Text = "Open表元素数: 1";
 			});
+
 
 			while (!queue.Empty() && !hash.ContainsKey(aim))
 			{
@@ -405,13 +411,18 @@ namespace EightPuzzle
 				Node tmp = queue.Pop();
 				now = tmp.now;
 				nowDepth = tmp.depth;
-				nowGrayBlockPosition = tmp.grayBlockPosition;
+				if (isEightPuzzle)
+					nowGrayBlockPosition = tmp.grayBlockPosition;
+				else
+					nowGrayBlockPosition = ro.Next(mapSize);
 				CantorReverse(now, rev);
 				Invoke((EventHandler)delegate {
 					if (tmp.value < nowF)
 						label4.Text = "False";
 					else
 						nowF = tmp.value;
+					yData.Add(nowF);
+					chart1.Series[0].Points.DataBindY(yData);
 					String tmpStr = GetString(ref rev);
 					label1.Text = "Now: " + tmpStr + (radioButton1.Checked ? ("H1 = " + H(rev)) : ("H2 = " + H1(rev)));
 					label2.Text = "Open表元素数: " + queue.Count + " 总扩展节点数: " + (queue.Count + useNode);
@@ -560,6 +571,20 @@ namespace EightPuzzle
 			listBox1.Items.Clear();
 			Thread newThread = new Thread(A_Star){IsBackground = true};
 			newThread.Start();
+		}
+
+		private void OnClick(object sender, EventArgs e)
+		{
+			if(button1.Text == "开启9数码模式")
+			{
+				button1.Text = "开启8数码模式";
+				isEightPuzzle = false;
+			}
+			else
+			{
+				button1.Text = "开启9数码模式";
+				isEightPuzzle = true;
+			}
 		}
 
 		private bool WinCheck()

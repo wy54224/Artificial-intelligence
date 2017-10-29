@@ -199,7 +199,7 @@ namespace TSP
 				y = ro.Next(point.Length);
 			} while (x == y);
 
-			double ranRate = ro.Next(0) / (double)System.Int32.MaxValue, sum = opt[0] + opt[1] + opt[2];
+			double ranRate = ro.Next() / (double)System.Int32.MaxValue, sum = opt[0] + opt[1] + opt[2];
 			//操作1：将区间[x, y]的点翻转
 			if (ranRate < opt[0] / sum)
 			{
