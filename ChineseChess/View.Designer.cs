@@ -55,6 +55,7 @@
 			this.Text = "Chinese Chess";
 			this.Load += new System.EventHandler(this.OnLoad);
 			this.ResizeEnd += new System.EventHandler(this.SizeChange);
+			this.SizeChanged += new System.EventHandler(this.SizeMax);
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
 			this.ResumeLayout(false);
 

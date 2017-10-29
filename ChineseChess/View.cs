@@ -199,5 +199,22 @@ namespace ChineseChess
 			SetChessBoard();
 			DrawChessBoard();
 		}
+
+		FormWindowState lastState = FormWindowState.Normal;
+		private void SizeMax(object sender, EventArgs e)
+		{
+			if (WindowState == FormWindowState.Maximized)
+			{
+				SizeChange(sender, e);
+				lastState = FormWindowState.Maximized;
+			}
+			else
+			if(WindowState == FormWindowState.Normal && lastState == FormWindowState.Maximized)
+			{
+				SizeChange(sender, e);
+				lastState = FormWindowState.Normal;
+			}
+
+		}
 	}
 }

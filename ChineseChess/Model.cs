@@ -68,43 +68,44 @@ namespace ChineseChess
 			chess = new ChessPos[2, 16];
 			for (int i = 0; i < 2; ++i)
 				for (int j = 0; j < 16; ++j) chess[i, j] = new ChessPos();
-			Reset();
+			Reset(Player.Red);
 		}
 
-		public void Reset()
+		public void Reset(Player RedOrBlack)
 		{
+			int iRedOrBlack = (int)RedOrBlack;
 			//位置初始化
 			ChessPos tmpPos;
 			//车->将位置初始化
 			for (int i = (int)ChessType.Rook1; i <= (int)ChessType.Rook2; ++i)
 			{
-				tmpPos = chess[0, i];
+				tmpPos = chess[iRedOrBlack ^ 1, i];
 				tmpPos.Location = new Point(i, 0);
 				tmpPos.Live = true;
-				tmpPos = chess[1, i];
+				tmpPos = chess[iRedOrBlack, i];
 				tmpPos.Location = new Point(i, 9);
 				tmpPos.Live = true;
 			}
 			//炮位置初始化
-			tmpPos = chess[0, (int)ChessType.Cannon1];
+			tmpPos = chess[iRedOrBlack ^ 1, (int)ChessType.Cannon1];
 			tmpPos.Location = new Point(1, 2);
 			tmpPos.Live = true;
-			tmpPos = chess[0, (int)ChessType.Cannon2];
+			tmpPos = chess[iRedOrBlack ^ 1, (int)ChessType.Cannon2];
 			tmpPos.Location = new Point(7, 2);
 			tmpPos.Live = true;
-			tmpPos = chess[1, (int)ChessType.Cannon1];
+			tmpPos = chess[iRedOrBlack, (int)ChessType.Cannon1];
 			tmpPos.Location = new Point(1, 7);
 			tmpPos.Live = true;
-			tmpPos = chess[1, (int)ChessType.Cannon2];
+			tmpPos = chess[iRedOrBlack, (int)ChessType.Cannon2];
 			tmpPos.Location = new Point(7, 7);
 			tmpPos.Live = true;
 			//卒位置初始化
 			for (int i = (int)ChessType.Pawn1; i <= (int)ChessType.Pawn5; ++i)
 			{
-				tmpPos = chess[0, i];
+				tmpPos = chess[iRedOrBlack ^ 1, i];
 				tmpPos.Location = new Point((i - (int)ChessType.Pawn1) << 1, 3);
 				tmpPos.Live = true;
-				tmpPos = chess[1, i];
+				tmpPos = chess[iRedOrBlack, i];
 				tmpPos.Location = new Point((i - (int)ChessType.Pawn1) << 1, 6);
 				tmpPos.Live = true;
 			}
