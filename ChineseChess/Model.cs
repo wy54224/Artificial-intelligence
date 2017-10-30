@@ -38,7 +38,8 @@ namespace ChineseChess
 	public enum Player
 	{
 		Black, //黑子
-		Red //红子
+		Red, //红子
+		None //什么都不是
 	}
 	public enum ChessType
 	{

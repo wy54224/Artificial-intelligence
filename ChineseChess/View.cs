@@ -105,6 +105,7 @@ namespace ChineseChess
 		#region 画棋盘
 		private void DrawChessBoard()
 		{
+			controller.SetChessBoard(picturebox2);
 			chesspiece = new ChessPiece[32];
 			for(int i = 0; i < 16; ++i)
 			{
