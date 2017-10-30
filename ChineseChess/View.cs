@@ -23,15 +23,25 @@ namespace ChineseChess
 		private int gridLength = 1;
 		public ChessPiece[] chesspiece;
 		public PictureBox picturebox2;
+		public PictureBox []whichPlayer;
 
 		public View()
 		{
 			picturebox2 = new PictureBox();
+			whichPlayer = new PictureBox[2];
+			whichPlayer[0] = new PictureBox();
+			whichPlayer[1] = new PictureBox();
 			InitializeComponent();
 			picturebox2.Image = Properties.Resources.chessboard;
 			picturebox2.SizeMode = PictureBoxSizeMode.StretchImage;
 			gridLength = 1;
+			whichPlayer[1].Image = Properties.Resources.RedKing;
+			whichPlayer[1].SizeMode = PictureBoxSizeMode.StretchImage;
+			whichPlayer[0].Image = Properties.Resources.BlackKing;
+			whichPlayer[0].SizeMode = PictureBoxSizeMode.StretchImage;
 			pictureBox1.Controls.Add(picturebox2);
+			pictureBox1.Controls.Add(whichPlayer[0]);
+			pictureBox1.Controls.Add(whichPlayer[1]);
 		}
 
 		#region 得到对应的棋子图片
@@ -107,7 +117,7 @@ namespace ChineseChess
 		{
 			controller.SetChessBoard(picturebox2);
 			chesspiece = new ChessPiece[32];
-			for(int i = 0; i < 16; ++i)
+			for (int i = 0; i < 16; ++i)
 			{
 				chesspiece[i] = new ChessPiece(Player.Red, (ChessType)i);
 				Binding binding1 = new Binding("Location", controller.model[Player.Red, (ChessType)i], "Location");
@@ -116,6 +126,8 @@ namespace ChineseChess
 				chesspiece[i].Picture.SizeMode = PictureBoxSizeMode.StretchImage;
 				chesspiece[i].Picture.DataBindings.Add(binding1);
 				chesspiece[i].Picture.DataBindings.Add("Visible", controller.model[Player.Red, (ChessType)i], "Live");
+				chesspiece[i].Picture.DataBindings.Add("Enabled", controller.model[Player.Red, (ChessType)i], "Enabled");
+				chesspiece[i].Picture.Enabled = controller.model[Player.Red, (ChessType)i].Enabled;
 				chesspiece[i].Picture.Size = new Size(gridLength, gridLength);
 				Point tmp1 = controller.model[Player.Red, (ChessType)i].Location;
 				tmp1.X *= gridLength;
@@ -131,6 +143,8 @@ namespace ChineseChess
 				chesspiece[i + 16].Picture.SizeMode = PictureBoxSizeMode.StretchImage;
 				chesspiece[i + 16].Picture.DataBindings.Add(binding2);
 				chesspiece[i + 16].Picture.DataBindings.Add("Visible", controller.model[Player.Black, (ChessType)i], "Live");
+				chesspiece[i + 16].Picture.DataBindings.Add("Enabled", controller.model[Player.Black, (ChessType)i], "Enabled");
+				chesspiece[i + 16].Picture.Enabled = controller.model[Player.Black, (ChessType)i].Enabled;
 				chesspiece[i + 16].Picture.Size = new Size(gridLength, gridLength);
 				Point tmp2 = controller.model[Player.Black, (ChessType)i].Location;
 				tmp1.X *= gridLength;
@@ -170,6 +184,12 @@ namespace ChineseChess
 			picturebox2.Width = gridLength * 9;
 			picturebox2.Height = pictureBox1.Height;
 			picturebox2.Location = new Point(gridLength * 3, 0);
+			whichPlayer[1].Width = gridLength;
+			whichPlayer[1].Height = gridLength;
+			whichPlayer[1].Location = new Point(gridLength, gridLength * 17 / 2);
+			whichPlayer[0].Width = gridLength;
+			whichPlayer[0].Height = gridLength;
+			whichPlayer[0].Location = new Point(gridLength * 13, gridLength * 3 / 2);
 		}
 
 		#region 当窗口大小变化棋盘大小也变化

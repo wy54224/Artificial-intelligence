@@ -13,6 +13,10 @@ namespace ChineseChess
 		private System.Timers.Timer timer;
 		private Player[,] playPos;
 		private ChessType[,] typePos;
+		//黑棋的卒在y轴的前进方向
+		private int direction;
+		//当前是哪个玩家在操作
+		private Player whichPlayer;
 		public Controller(View _view)
 		{
 			view = _view;
@@ -50,6 +54,18 @@ namespace ChineseChess
 			chess.Picture.Click += (object sender, EventArgs e)=> OnClick(chess.Player, chess.Type);
 		}
 
+		private void ChessEnableSet(Player whichPlayer)
+		{
+			int i = (int)whichPlayer;
+			view.whichPlayer[i].Visible = true;
+			view.whichPlayer[i ^ 1].Visible = false;
+			for(ChessType j = ChessType.Rook1; j <= ChessType.Pawn5; ++j)
+			{
+				model[whichPlayer, j].Enabled = true;
+				model[(Player)(i ^ 1), j].Enabled = false;
+			}
+		}
+
 		public void SetChessBoard(PictureBox chessboard)
 		{
 			for(int i = 0; i < 9; ++i)
@@ -64,6 +80,9 @@ namespace ChineseChess
 					playPos[model[i, j].Location.X, model[i, j].Location.Y] = i;
 					typePos[model[i, j].Location.X, model[i, j].Location.Y] = j;
 				}
+			direction = model[Player.Black, ChessType.King].Location.Y == 0 ? 1 : -1;
+			whichPlayer = Player.Red;
+			ChessEnableSet(whichPlayer);
 			chessboard.MouseClick += (object sender, MouseEventArgs e) => {
 				timer.Enabled = false;
 				if(currentPlayer != Player.None && currentChess != ChessType.None)
@@ -77,7 +96,8 @@ namespace ChineseChess
 					if ((x != model[currentPlayer, currentChess].Location.X ||
 					y != model[currentPlayer, currentChess].Location.Y) && LogicCheck(x, y))
 					{
-
+						whichPlayer = (Player)((int)whichPlayer ^ 1);
+						ChessEnableSet(whichPlayer);
 					}
 					//MessageBox.Show(x.ToString() + " " + y.ToString());
 					currentPlayer = Player.None;
@@ -98,6 +118,8 @@ namespace ChineseChess
 					{
 						if (LogicCheck(model[player, type].Location.X, model[player, type].Location.Y))
 						{
+							whichPlayer = (Player)((int)whichPlayer ^ 1);
+							ChessEnableSet(whichPlayer);
 						}
 						currentPlayer = Player.None;
 						currentChess = ChessType.None;
@@ -224,15 +246,59 @@ namespace ChineseChess
 				case ChessType.Mandarin1:
 				case ChessType.Mandarin2:
 				#region 士/仕逻辑判断
+					if (x < 3 || x > 5) return false;
+					if ((currentY <= 2 && y <= 2) || (currentY >= 7 && y >= 7))
+					{
+						if (Math.Abs(x - currentX) != 1 || Math.Abs(y - currentY) != 1)
+							return false;
+					}
+					else
+						return false;
 					break;
 				#endregion
 				case ChessType.Cannon1:
 				case ChessType.Cannon2:
 				#region 炮逻辑判断
+					int chessNum = 0;
+					if (x == currentX)
+					{
+						int miny = y, maxy = currentY;
+						if (miny > maxy) Swap(ref miny, ref maxy);
+						miny += 1;
+						for (int i = miny; i < maxy; ++i)
+							if (playPos[x, i] != Player.None && typePos[x, i] != ChessType.None)
+								++chessNum;
+					}
+					else
+					if (y == currentY)
+					{
+						int minx = x, maxx = currentX;
+						if (minx > maxx) Swap(ref minx, ref maxx);
+						minx += 1;
+						for (int i = minx; i < maxx; ++i)
+							if (playPos[i, y] != Player.None && typePos[i, y] != ChessType.None)
+								++chessNum;
+					}
+					else
+						return false;
+					if (playPos[x, y] != Player.None && typePos[x, y] != ChessType.None)
+					{
+						if (chessNum != 1) return false;
+					}
+					else
+						if (chessNum != 0) return false;
 					break;
 				#endregion
 				case ChessType.King:
 				#region 将/帅逻辑判断
+					if (x < 3 || x > 5) return false;
+					if ((currentY <= 2 && y <= 2) || (currentY >= 7 && y >= 7))
+					{
+						if (Math.Abs(x - currentX) + Math.Abs(y - currentY) != 1)
+							return false;
+					}
+					else
+						return false;
 					break;
 				#endregion
 				case ChessType.Pawn1:
@@ -241,6 +307,39 @@ namespace ChineseChess
 				case ChessType.Pawn4:
 				case ChessType.Pawn5:
 				#region 兵/卒逻辑判断
+					if (currentPlayer == Player.Black)
+					{
+						if((direction == 1 && currentY <= 4) || (direction == -1 && currentY >= 5))
+						{
+							if (x != currentX || y != currentY + direction)
+								return false;
+						}
+						else
+						{
+							if (x == currentX && y != currentY + direction)
+								return false;
+							if (y == currentY && Math.Abs(x - currentX) != 1)
+								return false;
+						}
+					}
+					else
+					if (currentPlayer == Player.Red)
+					{
+						if ((direction == -1 && currentY <= 4) || (direction == 1 && currentY >= 5))
+						{
+							if (x != currentX || y != currentY - direction)
+								return false;
+						}
+						else
+						{
+							if (x == currentX && y != currentY - direction)
+								return false;
+							if (y == currentY && Math.Abs(x - currentX) != 1)
+								return false;
+						}
+					}
+					else
+						return false;
 					break;
 				#endregion
 				default:

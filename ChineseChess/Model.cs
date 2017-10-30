@@ -33,6 +33,20 @@ namespace ChineseChess
 			}
 		}
 
+		private bool enabled = true;
+		public bool Enabled
+		{
+			get => enabled;
+			set
+			{
+				if(enabled != value)
+				{
+					enabled = value;
+					PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Enabled"));
+				}
+			}
+		}
+
 		public event PropertyChangedEventHandler PropertyChanged;
 	}
 	public enum Player
@@ -83,32 +97,40 @@ namespace ChineseChess
 				tmpPos = chess[iRedOrBlack ^ 1, i];
 				tmpPos.Location = new Point(i, 0);
 				tmpPos.Live = true;
+				tmpPos.Enabled = true;
 				tmpPos = chess[iRedOrBlack, i];
 				tmpPos.Location = new Point(i, 9);
 				tmpPos.Live = true;
+				tmpPos.Enabled = true;
 			}
 			//炮位置初始化
 			tmpPos = chess[iRedOrBlack ^ 1, (int)ChessType.Cannon1];
 			tmpPos.Location = new Point(1, 2);
 			tmpPos.Live = true;
+			tmpPos.Enabled = true;
 			tmpPos = chess[iRedOrBlack ^ 1, (int)ChessType.Cannon2];
 			tmpPos.Location = new Point(7, 2);
 			tmpPos.Live = true;
+			tmpPos.Enabled = true;
 			tmpPos = chess[iRedOrBlack, (int)ChessType.Cannon1];
 			tmpPos.Location = new Point(1, 7);
 			tmpPos.Live = true;
+			tmpPos.Enabled = true;
 			tmpPos = chess[iRedOrBlack, (int)ChessType.Cannon2];
 			tmpPos.Location = new Point(7, 7);
 			tmpPos.Live = true;
+			tmpPos.Enabled = true;
 			//卒位置初始化
 			for (int i = (int)ChessType.Pawn1; i <= (int)ChessType.Pawn5; ++i)
 			{
 				tmpPos = chess[iRedOrBlack ^ 1, i];
 				tmpPos.Location = new Point((i - (int)ChessType.Pawn1) << 1, 3);
 				tmpPos.Live = true;
+				tmpPos.Enabled = true;
 				tmpPos = chess[iRedOrBlack, i];
 				tmpPos.Location = new Point((i - (int)ChessType.Pawn1) << 1, 6);
 				tmpPos.Live = true;
+				tmpPos.Enabled = true;
 			}
 		}
 
