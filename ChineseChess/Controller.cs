@@ -98,9 +98,9 @@ namespace ChineseChess
 					{
 						if (LogicCheck(model[player, type].Location.X, model[player, type].Location.Y))
 						{
-							currentPlayer = Player.None;
-							currentChess = ChessType.None;
 						}
+						currentPlayer = Player.None;
+						currentChess = ChessType.None;
 					} else {
 						timer.Enabled = true;
 						currentPlayer = player;
@@ -156,12 +156,6 @@ namespace ChineseChess
 					}
 					else
 						return false;
-					if(playPos[x, y] != Player.None && typePos[x, y] != ChessType.None)
-					{
-						Player tmpPlayer = playPos[x, y];
-						ChessType tmpType = typePos[x, y];
-						model[tmpPlayer, tmpType].Live = false;
-					}
 					break;
 				#endregion
 				case ChessType.Knight1:
@@ -192,18 +186,39 @@ namespace ChineseChess
 					}
 					else
 						return false;
-					if (playPos[x, y] != Player.None && typePos[x, y] != ChessType.None)
-					{
-						Player tmpPlayer = playPos[x, y];
-						ChessType tmpType = typePos[x, y];
-						model[tmpPlayer, tmpType].Live = false;
-					}
 					break;
 				#endregion
 				case ChessType.Elephant1:
 				case ChessType.Elephant2:
 				#region 象/相逻辑判断
-
+					if ((currentY <= 4 && y <= 4) || (currentY >= 5 && y >= 5))
+					{
+						if (currentX + 2 == x && currentY + 2 == y)
+						{
+							if (playPos[currentX + 1, currentY + 1] != Player.None && typePos[currentX + 1, currentY + 1] != ChessType.None)
+								return false;
+						}
+						else
+						if (currentX + 2 == x && currentY - 2 == y)
+						{
+							if (playPos[currentX + 1, currentY - 1] != Player.None && typePos[currentX + 1, currentY - 1] != ChessType.None)
+								return false;
+						}
+						else
+						if (currentX - 2 == x && currentY + 2 == y)
+						{
+							if (playPos[currentX - 1, currentY + 1] != Player.None && typePos[currentX - 1, currentY + 1] != ChessType.None)
+								return false;
+						}
+						else
+						if (currentX - 2 == x && currentY - 2 == y)
+						{
+							if (playPos[currentX - 1, currentY - 1] != Player.None && typePos[currentX - 1, currentY - 1] != ChessType.None)
+								return false;
+						}
+					}
+					else
+						return false;
 					break;
 				#endregion
 				case ChessType.Mandarin1:
@@ -231,6 +246,14 @@ namespace ChineseChess
 				default:
 					return false;
 			}
+			//吃子
+			if (playPos[x, y] != Player.None && typePos[x, y] != ChessType.None)
+			{
+				Player tmpPlayer = playPos[x, y];
+				ChessType tmpType = typePos[x, y];
+				model[tmpPlayer, tmpType].Live = false;
+			}
+			//棋子移动
 			playPos[model[currentPlayer, currentChess].Location.X, model[currentPlayer, currentChess].Location.Y] = Player.None;
 			typePos[model[currentPlayer, currentChess].Location.X, model[currentPlayer, currentChess].Location.Y] = ChessType.None;
 			playPos[x, y] = currentPlayer;
