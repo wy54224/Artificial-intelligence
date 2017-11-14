@@ -181,10 +181,10 @@ namespace ChineseChess
 			else
 			{
 				Player anotherPlayer = (Player)((int)currentPlayer ^ 1);
-				if(x == model[anotherPlayer, ChessType.King].Location.X && x != currentX)
+				if(x == model[anotherPlayer, ChessType.King].Location.X)
 				{
-					int miny = model[Player.Red, ChessType.King].Location.Y;
-					int maxy = model[Player.Black, ChessType.King].Location.Y;
+					int miny = model[anotherPlayer, ChessType.King].Location.Y;
+					int maxy = y;
 					if (miny > maxy) Swap(ref miny, ref maxy);
 					bool bj = true;
 					++miny;
