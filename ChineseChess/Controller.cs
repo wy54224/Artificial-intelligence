@@ -152,6 +152,56 @@ namespace ChineseChess
 		{
 			if (playPos[x, y] == currentPlayer) return false;
 			int currentX = model[currentPlayer, currentChess].Location.X, currentY = model[currentPlayer, currentChess].Location.Y;
+			#region 将帅照面逻辑判断
+			//如果不是移动将或者帅
+			if(currentChess != ChessType.King)
+			{
+				if (model[Player.Red, ChessType.King].Location.X == model[Player.Black, ChessType.King].Location.X
+				&& model[Player.Red, ChessType.King].Location.X == currentX && currentX != x)
+				{
+					int miny = model[Player.Red, ChessType.King].Location.Y;
+					int maxy = model[Player.Black, ChessType.King].Location.Y;
+					if (miny > maxy) Swap(ref miny, ref maxy);
+					bool bj = true;
+					++miny;
+					for(int i = miny; i < maxy; ++i)
+						if(playPos[currentX, i] != Player.None && i != currentY)
+						{
+							bj = false;
+							break;
+						}
+					if (bj)
+					{
+						MessageBox.Show("将帅不能碰面！");
+						return false;
+					}
+				}
+			}
+			//如果是移动将或者帅
+			else
+			{
+				Player anotherPlayer = (Player)((int)currentPlayer ^ 1);
+				if(x == model[anotherPlayer, ChessType.King].Location.X && x != currentX)
+				{
+					int miny = model[Player.Red, ChessType.King].Location.Y;
+					int maxy = model[Player.Black, ChessType.King].Location.Y;
+					if (miny > maxy) Swap(ref miny, ref maxy);
+					bool bj = true;
+					++miny;
+					for(int i = miny; i < maxy; ++i)
+						if(playPos[x, i] != Player.None)
+						{
+							bj = false;
+							break;
+						}
+					if (bj)
+					{
+						MessageBox.Show("将帅不能碰面！");
+						return false;
+					}
+				}
+			}
+			#endregion
 			switch (currentChess)
 			{
 				case ChessType.Rook1:
@@ -164,7 +214,7 @@ namespace ChineseChess
 						miny += 1;
 						for (int i = miny; i < maxy; ++i)
 							if (playPos[x, i] != Player.None && typePos[x, i] != ChessType.None)
-								return false; ;
+								return false;
 					}
 					else
 					if (y == currentY)
