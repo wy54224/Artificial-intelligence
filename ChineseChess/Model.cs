@@ -8,7 +8,10 @@ namespace ChineseChess
 		private Point location;
 		public Point Location
 		{
-			get => location;
+			get
+            {
+                return location;
+            }
 			set
 			{
 				if(value != location)
@@ -22,7 +25,9 @@ namespace ChineseChess
 		private bool isLive = true;
 		public bool Live
 		{
-			get => isLive;
+			get {
+                return isLive;
+            }
 			set
 			{
 				if(isLive != value)
@@ -36,7 +41,10 @@ namespace ChineseChess
 		private bool enabled = true;
 		public bool Enabled
 		{
-			get => enabled;
+			get
+            {
+                return enabled;
+            }
 			set
 			{
 				if(enabled != value)
@@ -136,7 +144,10 @@ namespace ChineseChess
 
 		public ChessPos this[Player player, ChessType chesstype]
 		{
-			get => chess[(int)player, (int)chesstype];
+			get
+            {
+                return chess[(int)player, (int)chesstype];
+            }
 		}
 	}
 }

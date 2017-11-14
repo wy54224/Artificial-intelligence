@@ -1,0 +1,9 @@
+C:\Users\air\Desktop\Artificial-intelligence-master\Artificial-intelligence-master\ChineseChess\bin\Debug\ChineseChess.exe.config
+C:\Users\air\Desktop\Artificial-intelligence-master\Artificial-intelligence-master\ChineseChess\obj\Debug\ChineseChess.csprojResolveAssemblyReference.cache
+C:\Users\air\Desktop\Artificial-intelligence-master\Artificial-intelligence-master\ChineseChess\obj\Debug\ChineseChess.Properties.Resources.resources
+C:\Users\air\Desktop\Artificial-intelligence-master\Artificial-intelligence-master\ChineseChess\obj\Debug\ChineseChess.View.resources
+C:\Users\air\Desktop\Artificial-intelligence-master\Artificial-intelligence-master\ChineseChess\obj\Debug\ChineseChess.csproj.GenerateResource.Cache
+C:\Users\air\Desktop\Artificial-intelligence-master\Artificial-intelligence-master\ChineseChess\bin\Debug\ChineseChess.exe
+C:\Users\air\Desktop\Artificial-intelligence-master\Artificial-intelligence-master\ChineseChess\bin\Debug\ChineseChess.pdb
+C:\Users\air\Desktop\Artificial-intelligence-master\Artificial-intelligence-master\ChineseChess\obj\Debug\ChineseChess.exe
+C:\Users\air\Desktop\Artificial-intelligence-master\Artificial-intelligence-master\ChineseChess\obj\Debug\ChineseChess.pdb

@@ -196,7 +196,7 @@ namespace ChineseChess
 		private void SizeChange(object sender, System.EventArgs e)
 		{
 			SetChessBoard();
-			if (!(controller is null))
+			if (!(controller == null))
 			{
 				for (int i = 0; i < 16; ++i)
 				{
