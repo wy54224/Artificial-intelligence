@@ -164,6 +164,8 @@ namespace ChineseChess
 				Point loc = model[whichPlayer, ChessType.King].Location;
 				if (currentChess != ChessType.King)
 				{
+					//MessageBox.Show(loc.X + " " + loc.Y + " " + x + " " + y);
+					//MessageBox.Show(direction.ToString());
 					if(LogicCheck(loc.X, loc.Y, false)) MessageBox.Show("将军");
 				}
 				else
@@ -232,30 +234,6 @@ namespace ChineseChess
 					++miny;
 					for(int i = miny; i < maxy; ++i)
 						if(playPos[currentX, i] != Player.None && i != currentY)
-						{
-							bj = false;
-							break;
-						}
-					if (bj)
-					{
-						MessageBox.Show("将帅不能照面！");
-						return false;
-					}
-				}
-			}
-			//如果是移动将或者帅
-			else
-			{
-				Player anotherPlayer = (Player)((int)currentPlayer ^ 1);
-				if(x == model[anotherPlayer, ChessType.King].Location.X)
-				{
-					int miny = model[anotherPlayer, ChessType.King].Location.Y;
-					int maxy = y;
-					if (miny > maxy) Swap(ref miny, ref maxy);
-					bool bj = true;
-					++miny;
-					for (int i = miny; i < maxy; ++i)
-						if(playPos[x, i] != Player.None)
 						{
 							bj = false;
 							break;
@@ -354,6 +332,8 @@ namespace ChineseChess
 							if (playPos[currentX - 1, currentY - 1] != Player.None && typePos[currentX - 1, currentY - 1] != ChessType.None)
 								return false;
 						}
+						else
+							return false;
 					}
 					else
 						return false;
@@ -415,6 +395,27 @@ namespace ChineseChess
 					}
 					else
 						return false;
+					//如果是移动将或者帅
+					Player anotherPlayer = (Player)((int)currentPlayer ^ 1);
+					if (x == model[anotherPlayer, ChessType.King].Location.X)
+					{
+						int miny = model[anotherPlayer, ChessType.King].Location.Y;
+						int maxy = y;
+						if (miny > maxy) Swap(ref miny, ref maxy);
+						bool bj = true;
+						++miny;
+						for (int i = miny; i < maxy; ++i)
+							if (playPos[x, i] != Player.None)
+							{
+								bj = false;
+								break;
+							}
+						if (bj)
+						{
+							MessageBox.Show("将帅不能照面！");
+							return false;
+						}
+					}
 					break;
 				#endregion
 				case ChessType.Pawn1:
@@ -432,9 +433,7 @@ namespace ChineseChess
 						}
 						else
 						{
-							if (x == currentX && y != currentY + direction)
-								return false;
-							if (y == currentY && Math.Abs(x - currentX) != 1)
+							if (!((x == currentX && y == currentY + direction) || (y == currentY && Math.Abs(x - currentX) == 1)))
 								return false;
 						}
 					}
@@ -448,9 +447,8 @@ namespace ChineseChess
 						}
 						else
 						{
-							if (x == currentX && y != currentY - direction)
-								return false;
-							if (y == currentY && Math.Abs(x - currentX) != 1)
+							//MessageBox.Show(x + " " + y + " " + currentX + " " + currentY);
+							if (!((x == currentX && y == currentY - direction) || (y == currentY && Math.Abs(x - currentX) == 1)))
 								return false;
 						}
 					}
