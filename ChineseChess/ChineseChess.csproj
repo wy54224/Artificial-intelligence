@@ -45,6 +45,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AI.cs" />
+    <Compile Include="ChessValue.cs" />
     <Compile Include="Controller.cs" />
     <Compile Include="Model.cs" />
     <Compile Include="View.cs">

@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Collections.Generic;
 
 namespace ChineseChess
 {
-	public class Controller
+	public partial class Controller
 	{
 		public View view;
 		public Model model;
+		//当前操作玩家和当前操作的棋子
 		private Player currentPlayer;
 		private ChessType currentChess;
 		private System.Timers.Timer timer;
@@ -17,6 +19,22 @@ namespace ChineseChess
 		private int direction;
 		//当前是哪个玩家在操作
 		private Player whichPlayer;
+		//哪个是电脑
+		private Player computer;
+		//用来悔棋的
+		public struct MoveOperation{
+			public Point start, end;
+			public ChessType typeS, typeE;
+			public MoveOperation(Point _start, Point _end, ChessType _typeS, ChessType _typeE)
+			{
+				start = _start;
+				end = _end;
+				typeS = _typeS;
+				typeE = _typeE;
+			}
+		}
+		List<MoveOperation> list;
+
 		public Controller(View _view)
 		{
 			view = _view;
@@ -32,6 +50,7 @@ namespace ChineseChess
 				Enabled = false
 			};
 			timer.Elapsed += ChessTwinkle;
+			list = new List<MoveOperation>();
 		}
 
 		private void Swap<T>(ref T lsh, ref T rsh)
@@ -41,6 +60,7 @@ namespace ChineseChess
 			rsh = tmp;
 		}
 
+		//选中棋子闪烁
 		private void ChessTwinkle(object sender, System.Timers.ElapsedEventArgs e)
 		{
 			view.Invoke((EventHandler)(delegate
@@ -54,6 +74,38 @@ namespace ChineseChess
 			chess.Picture.Click += (object sender, EventArgs e)=> OnClick(chess.Player, chess.Type);
 		}
 
+		//悔棋设置
+		public void SetBack(Button button)
+		{
+			button.Click += (object sender, EventArgs e) =>
+			{
+				while(list.Count > 0)
+				{
+					MoveOperation op = list[list.Count - 1];
+					list.RemoveAt(list.Count - 1);
+					ChessType typeS = op.typeS, typeE = op.typeE;
+					Player playerE = whichPlayer, playerS = (Player)((int)whichPlayer ^ 1);
+					model[playerS, typeS].Location = op.start;
+					model[playerS, typeS].Live = true;
+					if(typeE != ChessType.None)
+					{
+						model[playerE, typeE].Location = op.end;
+						model[playerE, typeE].Live = true;
+					}
+					playPos[op.start.X, op.start.Y] = playerS;
+					typePos[op.start.X, op.start.Y] = typeS;
+					playPos[op.end.X, op.end.Y] = typeE == ChessType.None ? Player.None : playerE;
+					typePos[op.end.X, op.end.Y] = typeE;
+					whichPlayer = playerS;
+					ChessEnableSet(whichPlayer);
+					if (whichPlayer != computer)
+						break;
+				}
+				list.Clear();
+			};
+		}
+
+		//不是自己的棋不给选择
 		private void ChessEnableSet(Player whichPlayer)
 		{
 			int i = (int)whichPlayer;
@@ -66,7 +118,8 @@ namespace ChineseChess
 			}
 		}
 
-		public void SetChessBoard(PictureBox chessboard)
+		//棋盘初始设置（棋盘存储、鼠标事件添加）
+		public void SetChessBoard(PictureBox chessboard, Player player)
 		{
 			for(int i = 0; i < 9; ++i)
 				for(int j = 0; j < 10; ++j)
@@ -81,7 +134,8 @@ namespace ChineseChess
 					typePos[model[i, j].Location.X, model[i, j].Location.Y] = j;
 				}
 			direction = model[Player.Black, ChessType.King].Location.Y == 0 ? 1 : -1;
-			whichPlayer = Player.Red;
+			whichPlayer = player;
+			computer = (Player)((int)whichPlayer ^ 1);
 			ChessEnableSet(whichPlayer);
 			chessboard.MouseClick += (object sender, MouseEventArgs e) => {
 				timer.Enabled = false;
@@ -93,48 +147,60 @@ namespace ChineseChess
 					int x = e.Location.X, y = e.Location.Y;
 					x = (int)Math.Round((x - length / 2) / length);
 					y = (int)Math.Round((y - length / 2) / length);
-					if ((x != model[currentPlayer, currentChess].Location.X ||
-					y != model[currentPlayer, currentChess].Location.Y) && LogicCheck(x, y))
-					{
-						whichPlayer = (Player)((int)whichPlayer ^ 1);
-						ChessEnableSet(whichPlayer);
-					}
-					//MessageBox.Show(x.ToString() + " " + y.ToString());
-					currentPlayer = Player.None;
-					currentChess = ChessType.None;
+					ChessboardClick(x, y);
 				}
 			};
 		}
 
+		//棋盘落子判断
+		private void ChessboardClick(int x, int y)
+		{
+			if ((x != model[currentPlayer, currentChess].Location.X ||
+					y != model[currentPlayer, currentChess].Location.Y) && LogicCheck(x, y, true))
+			{
+				whichPlayer = (Player)((int)whichPlayer ^ 1);
+				ChessEnableSet(whichPlayer);
+				//将军逻辑判断
+				Point loc = model[whichPlayer, ChessType.King].Location;
+				if (currentChess != ChessType.King)
+				{
+					if(LogicCheck(loc.X, loc.Y, false)) MessageBox.Show("将军");
+				}
+				else
+				{
+					currentPlayer = whichPlayer;
+					for(currentChess = ChessType.Rook1; currentChess < ChessType.None; ++currentChess)
+						if(currentChess != ChessType.King && LogicCheck(x, y, false))
+						{
+							MessageBox.Show("将军");
+							break;
+						}
+				}
+			}
+			currentPlayer = Player.None;
+			currentChess = ChessType.None;
+			if (!(model[Player.Red, ChessType.King].Live))
+			{
+				MessageBox.Show("黑棋胜!");
+			}
+			else
+			if (!(model[Player.Black, ChessType.King].Live))
+			{
+				MessageBox.Show("红棋胜!");
+			}
+		}
+
+		//棋子单击判断（注意，由于对方棋子enabled设置为false，因此单击事件是失效的）
 		private void OnClick(Player player, ChessType type)
 		{
 			if (currentPlayer != player || currentChess != type)
 			{
 				timer.Enabled = false;
 				if (currentPlayer != Player.None && currentChess != ChessType.None)
-				{
 					model[currentPlayer, currentChess].Live = true;
-					if (currentPlayer != player)
-					{
-						if (LogicCheck(model[player, type].Location.X, model[player, type].Location.Y))
-						{
-							whichPlayer = (Player)((int)whichPlayer ^ 1);
-							ChessEnableSet(whichPlayer);
-						}
-						currentPlayer = Player.None;
-						currentChess = ChessType.None;
-					} else {
-						timer.Enabled = true;
-						currentPlayer = player;
-						currentChess = type;
-					}
-				}
-				else
-				{
-					timer.Enabled = true;
-					currentPlayer = player;
-					currentChess = type;
-				}
+				timer.Enabled = true;
+				currentPlayer = player;
+				currentChess = type;
 			}
 			else
 			{
@@ -148,7 +214,7 @@ namespace ChineseChess
 		}
 
 		//各种走法判断、吃子判断等等
-		private bool LogicCheck(int x, int y)
+		private bool LogicCheck(int x, int y, bool canMove)
 		{
 			if (playPos[x, y] == currentPlayer) return false;
 			int currentX = model[currentPlayer, currentChess].Location.X, currentY = model[currentPlayer, currentChess].Location.Y;
@@ -172,7 +238,7 @@ namespace ChineseChess
 						}
 					if (bj)
 					{
-						MessageBox.Show("将帅不能碰面！");
+						MessageBox.Show("将帅不能照面！");
 						return false;
 					}
 				}
@@ -188,7 +254,7 @@ namespace ChineseChess
 					if (miny > maxy) Swap(ref miny, ref maxy);
 					bool bj = true;
 					++miny;
-					for(int i = miny; i < maxy; ++i)
+					for (int i = miny; i < maxy; ++i)
 						if(playPos[x, i] != Player.None)
 						{
 							bj = false;
@@ -196,7 +262,7 @@ namespace ChineseChess
 						}
 					if (bj)
 					{
-						MessageBox.Show("将帅不能碰面！");
+						MessageBox.Show("将帅不能照面！");
 						return false;
 					}
 				}
@@ -395,19 +461,27 @@ namespace ChineseChess
 				default:
 					return false;
 			}
-			//吃子
-			if (playPos[x, y] != Player.None && typePos[x, y] != ChessType.None)
+			//如果需要判断完逻辑后移动
+			if (canMove)
 			{
-				Player tmpPlayer = playPos[x, y];
-				ChessType tmpType = typePos[x, y];
-				model[tmpPlayer, tmpType].Live = false;
+				//加入悔棋的队列
+				while (list.Count > 1)
+					list.RemoveAt(0);
+				list.Add(new MoveOperation(model[currentPlayer, currentChess].Location, new Point(x, y), currentChess, typePos[x, y]));
+				//吃子
+				if (playPos[x, y] != Player.None && typePos[x, y] != ChessType.None)
+				{
+					Player tmpPlayer = playPos[x, y];
+					ChessType tmpType = typePos[x, y];
+					model[tmpPlayer, tmpType].Live = false;
+				}
+				//棋子移动
+				playPos[model[currentPlayer, currentChess].Location.X, model[currentPlayer, currentChess].Location.Y] = Player.None;
+				typePos[model[currentPlayer, currentChess].Location.X, model[currentPlayer, currentChess].Location.Y] = ChessType.None;
+				playPos[x, y] = currentPlayer;
+				typePos[x, y] = currentChess;
+				model[currentPlayer, currentChess].Location = new Point(x, y);
 			}
-			//棋子移动
-			playPos[model[currentPlayer, currentChess].Location.X, model[currentPlayer, currentChess].Location.Y] = Player.None;
-			typePos[model[currentPlayer, currentChess].Location.X, model[currentPlayer, currentChess].Location.Y] = ChessType.None;
-			playPos[x, y] = currentPlayer;
-			typePos[x, y] = currentChess;
-			model[currentPlayer, currentChess].Location = new Point(x, y);
 			return true;
 		}
 	}

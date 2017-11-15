@@ -24,6 +24,7 @@ namespace ChineseChess
 		public ChessPiece[] chesspiece;
 		public PictureBox picturebox2;
 		public PictureBox []whichPlayer;
+		public Button back;
 
 		public View()
 		{
@@ -31,6 +32,7 @@ namespace ChineseChess
 			whichPlayer = new PictureBox[2];
 			whichPlayer[0] = new PictureBox();
 			whichPlayer[1] = new PictureBox();
+			back = new Button();
 			InitializeComponent();
 			picturebox2.Image = Properties.Resources.chessboard;
 			picturebox2.SizeMode = PictureBoxSizeMode.StretchImage;
@@ -39,9 +41,11 @@ namespace ChineseChess
 			whichPlayer[1].SizeMode = PictureBoxSizeMode.StretchImage;
 			whichPlayer[0].Image = Properties.Resources.BlackKing;
 			whichPlayer[0].SizeMode = PictureBoxSizeMode.StretchImage;
+			back.Text = "悔棋";
 			pictureBox1.Controls.Add(picturebox2);
 			pictureBox1.Controls.Add(whichPlayer[0]);
 			pictureBox1.Controls.Add(whichPlayer[1]);
+			pictureBox1.Controls.Add(back);
 		}
 
 		#region 得到对应的棋子图片
@@ -115,7 +119,8 @@ namespace ChineseChess
 		#region 画棋盘
 		private void DrawChessBoard()
 		{
-			controller.SetChessBoard(picturebox2);
+			controller.SetChessBoard(picturebox2, Player.Red);
+			controller.SetBack(back);
 			chesspiece = new ChessPiece[32];
 			for (int i = 0; i < 16; ++i)
 			{
@@ -190,6 +195,11 @@ namespace ChineseChess
 			whichPlayer[0].Width = gridLength;
 			whichPlayer[0].Height = gridLength;
 			whichPlayer[0].Location = new Point(gridLength * 13, gridLength * 3 / 2);
+			back.Location = new Point(gridLength * 25 / 2, gridLength * 9 / 2 + gridLength / 6);
+			back.Font = new Font("宋体", gridLength / 4, FontStyle.Regular);
+			back.Width = gridLength * 3 / 2;
+			back.Height = gridLength / 3 * 2;
+			back.FlatStyle = FlatStyle.Flat;
 		}
 
 		#region 当窗口大小变化棋盘大小也变化
