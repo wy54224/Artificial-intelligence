@@ -6,7 +6,7 @@ namespace ChineseChess
 {
 	public partial class View : Form
 	{
-
+		//每个棋子及其图片类
 		public class ChessPiece{
 			public Player Player;
 			public ChessType Type;
@@ -15,16 +15,22 @@ namespace ChineseChess
 			{
 				this.Player = Player;
 				this.Type = Type;
-				this.Picture = new PictureBox();
+				Picture = new PictureBox();
 			}
 		}
 
 		public Controller controller;
+		//每个棋子的长宽
 		private int gridLength = 1;
+		//存储棋子的数组
 		public ChessPiece[] chesspiece;
+		//棋盘
 		public PictureBox picturebox2;
+		//显示哪个玩家执棋的图片
 		public PictureBox []whichPlayer;
+		//悔棋的按钮
 		public Button back;
+		//注意关联关系:picturebox2, whichPlayer, back是添加到picturebox1上的，棋子chesspiece是添加到picturebox2上的
 
 		public View()
 		{
@@ -119,18 +125,24 @@ namespace ChineseChess
 		#region 画棋盘
 		private void DrawChessBoard()
 		{
+			//设置己方棋盘和己方棋子颜色
 			controller.SetChessBoard(picturebox2, Player.Red);
+			//设置悔棋按钮
 			controller.SetBack(back);
 			chesspiece = new ChessPiece[32];
 			for (int i = 0; i < 16; ++i)
 			{
+				//红棋设置
 				chesspiece[i] = new ChessPiece(Player.Red, (ChessType)i);
+				//将图片的location属性和model的location绑定起来，并设定两个location之间的转换方程
 				Binding binding1 = new Binding("Location", controller.model[Player.Red, (ChessType)i], "Location");
 				binding1.Format += Binding_Format;
 				chesspiece[i].Picture.Image = GetCorrespondingImage(Player.Red, (ChessType)i);
 				chesspiece[i].Picture.SizeMode = PictureBoxSizeMode.StretchImage;
 				chesspiece[i].Picture.DataBindings.Add(binding1);
+				//Visible属性和棋子是否活着(live)绑定起来
 				chesspiece[i].Picture.DataBindings.Add("Visible", controller.model[Player.Red, (ChessType)i], "Live");
+				//Enabled属性绑定——非己方下棋阶段可以中断棋子上的单击事件
 				chesspiece[i].Picture.DataBindings.Add("Enabled", controller.model[Player.Red, (ChessType)i], "Enabled");
 				chesspiece[i].Picture.Enabled = controller.model[Player.Red, (ChessType)i].Enabled;
 				chesspiece[i].Picture.Size = new Size(gridLength, gridLength);
@@ -141,6 +153,7 @@ namespace ChineseChess
 				picturebox2.Controls.Add(chesspiece[i].Picture);
 				controller.SetChess(chesspiece[i]);
 
+				//黑棋设置
 				chesspiece[i + 16] = new ChessPiece(Player.Black, (ChessType)i);
 				Binding binding2 = new Binding("Location", controller.model[Player.Black, (ChessType)i], "Location");
 				binding2.Format += Binding_Format;
@@ -161,6 +174,7 @@ namespace ChineseChess
 		}
 		#endregion
 
+		//location关联的转换方程
 		private void Binding_Format(object sender, ConvertEventArgs e)
 		{
 			Point tmp = (Point)e.Value;
@@ -172,6 +186,7 @@ namespace ChineseChess
 		//棋盘设置
 		void SetChessBoard()
 		{
+			//这里是让x和y适应客户端大小并变成15:10的格式
 			int x = ClientSize.Height / 10 * 15;
 			if (x > ClientSize.Width) x = ClientSize.Width / 15;
 			int y = x * 10;
@@ -182,6 +197,7 @@ namespace ChineseChess
 				x = y * 15;
 				y *= 10;
 			}
+
 			gridLength = x / 15;
 			pictureBox1.Width = x;
 			pictureBox1.Height = y;
@@ -234,6 +250,7 @@ namespace ChineseChess
 		FormWindowState lastState = FormWindowState.Normal;
 		private void SizeMax(object sender, EventArgs e)
 		{
+			//最大化和还原不属于resize事件
 			if (WindowState == FormWindowState.Maximized)
 			{
 				SizeChange(sender, e);

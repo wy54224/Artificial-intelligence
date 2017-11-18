@@ -5,10 +5,15 @@ using System.Collections.Generic;
 
 namespace ChineseChess
 {
+	//有个小bug
+	//控件picturebox刚出现(闪烁的时候visible刚设定为true)，click事件谁也接收不到(就一瞬间)
 	public partial class Controller
 	{
+		//view和model
 		public View view;
 		public Model model;
+		//人工智障
+		AI ai;
 		//当前操作玩家和当前操作的棋子
 		private Player currentPlayer;
 		private ChessType currentChess;
@@ -40,7 +45,24 @@ namespace ChineseChess
 			view = _view;
 			view.controller = this;
 			model = new Model();
+			ai = new AI();
 			currentPlayer = Player.None;
+			/*string s = "";
+			for(int i = 0; i < 90; ++i)
+			{
+				if (i % 9 == 0)
+				{
+					Console.WriteLine(s);
+					s = "";
+				}
+				if (ai.chessSet[i, 2].Count > 0)
+					s += ai.chessSet[i, 2][0].Value + " ";
+				else
+					s += "0 ";
+				//s += ai.chessSet[i, 3].Count + " ";
+
+			}
+			Console.WriteLine(s);*/
 			currentChess = ChessType.None;
 			playPos = new Player[9, 10];
 			typePos = new ChessType[9, 10];
@@ -49,6 +71,7 @@ namespace ChineseChess
 				Interval = 400,
 				Enabled = false
 			};
+			timer.SynchronizingObject = view;
 			timer.Elapsed += ChessTwinkle;
 			list = new List<MoveOperation>();
 		}
@@ -63,10 +86,7 @@ namespace ChineseChess
 		//选中棋子闪烁
 		private void ChessTwinkle(object sender, System.Timers.ElapsedEventArgs e)
 		{
-			view.Invoke((EventHandler)(delegate
-			{
-				model[currentPlayer, currentChess].Live = !model[currentPlayer, currentChess].Live;
-			}));
+			model[currentPlayer, currentChess].Live = !model[currentPlayer, currentChess].Live;
 		}
 
 		public void SetChess(View.ChessPiece chess)
@@ -79,6 +99,13 @@ namespace ChineseChess
 		{
 			button.Click += (object sender, EventArgs e) =>
 			{
+				timer.Enabled = false;
+				if(currentPlayer != Player.None && currentChess != ChessType.None)
+				{
+					model[currentPlayer, currentChess].Live = true;
+					currentPlayer = Player.None;
+					currentChess = ChessType.None;
+				}
 				while(list.Count > 0)
 				{
 					MoveOperation op = list[list.Count - 1];
@@ -127,6 +154,7 @@ namespace ChineseChess
 					playPos[i, j] = Player.None;
 					typePos[i, j] = ChessType.None;
 				}
+			model.Reset(player);
 			for(Player i = Player.Black; i <= Player.Red; ++i)
 				for(ChessType j = ChessType.Rook1; j <= ChessType.Pawn5; ++j)
 				{
@@ -200,18 +228,22 @@ namespace ChineseChess
 				timer.Enabled = false;
 				if (currentPlayer != Player.None && currentChess != ChessType.None)
 					model[currentPlayer, currentChess].Live = true;
-				timer.Enabled = true;
 				currentPlayer = player;
 				currentChess = type;
+				timer.Enabled = true;
 			}
 			else
 			{
 				if (timer.Enabled)
 				{
+					timer.Enabled = false;
+					if (currentPlayer != Player.None && currentChess != ChessType.None)
+						model[currentPlayer, currentChess].Live = true;
 					currentPlayer = Player.None;
 					currentChess = ChessType.None;
 				}
-				timer.Enabled = !timer.Enabled;
+				else
+					timer.Enabled = true;
 			}
 		}
 
