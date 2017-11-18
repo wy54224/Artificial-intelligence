@@ -11,7 +11,7 @@ namespace ChineseChess
 		//0-車 1-马 2-象 3-士 4-将 5-炮 6-卒
 		//红棋
 		//7-車 8-马 9-象 10-士 11-帅 12-炮 13-卒
-		//車和炮使用一种单独的着法生成器，其他棋子使用预置着法生成器
+		//車和炮使用一种单独的着法生成器(预置+位棋盘)，其他棋子使用预置着法生成器
 		//象棋棋盘大小9*10
 		//0   1   2   3   4   5   6   7   8
 		//9   10  11  12  13  14  15  16  17
@@ -71,6 +71,11 @@ namespace ChineseChess
 			//预置着法生成器
 			//存储下一步的走法以及马脚和象眼(其他棋子置0，为多余的存储空间)
 			public List<pair>[,] chessSet;
+			//车炮预置着法生成器
+			public int[,] RookRow;
+			public int[,] RookCol;
+			public int[,] CannonRow;
+			public int[,] CannonCol;
 
 			//价值评估
 			//为了减少每次计算黑棋反转的代价存储的时候就存一个翻转数组up side down

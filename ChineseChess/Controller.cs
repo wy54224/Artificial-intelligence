@@ -59,7 +59,7 @@ namespace ChineseChess
 					s += ai.chessSet[i, 2][0].Value + " ";
 				else
 					s += "0 ";
-				//s += ai.chessSet[i, 3].Count + " ";
+				s += ai.chessSet[i, 0].Count + " ";
 
 			}
 			Console.WriteLine(s);*/
