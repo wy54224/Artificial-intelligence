@@ -16,6 +16,17 @@ namespace ChineseChess
 			ThisRook, ThisKnight, ThisElephant, ThisMandarin, ThisKing, ThisCannon, ThisPawn,
 			ThatRook, ThatKnight, ThatElephant, ThatMandarin, ThatKing, ThatCannon, ThatPawn
 		};
+
+		public CType ChessType2CType(ChessType type)
+		{
+			if (ChessType.Rook1 <= type && ChessType.King >= type)
+				return (CType)((int)type + (int)CType.ThisRook);
+			if (ChessType.Mandarin2 <= type && ChessType.Rook2 >= type)
+				return (CType)(8 - (int)type + (int)CType.ThisRook);
+			if (ChessType.Cannon1 == type || ChessType.Cannon2 == type)
+				return CType.ThisCannon;
+			return CType.ThisPawn;
+		}
 		//車和炮使用一种单独的着法生成器(预置+位棋盘)，其他棋子使用预置着法生成器
 		//象棋棋盘大小9*10
 		//0   1   2   3   4   5   6   7   8
@@ -441,15 +452,18 @@ namespace ChineseChess
 					CType attack = DelPiece(cur);
 					CType defense = DelPiece(aim);
 					AddPiece(aim, attack);
-					int thisKingCol = pos[(int)CType.ThisKing][0] % 9;
-					int thatKingCol = pos[(int)CType.ThatKing][0] % 9;
-					if (!(thisKingCol == thatKingCol && Col[thisKingCol] == 513))
+					if(pos[(int)CType.ThisKing].Count == 1 && pos[(int)CType.ThatKing].Count == 1)
 					{
-						int tmp = -AlphaBeta(2, true);
-						if(tmp > vi)
+						int thisKingCol = pos[(int)CType.ThisKing][0] % 9;
+						int thatKingCol = pos[(int)CType.ThatKing][0] % 9;
+						if (!(thisKingCol == thatKingCol && Col[thisKingCol] == 513))
 						{
-							vi = tmp;
-							ans = moves[i];
+							int tmp = -AlphaBeta(2, true);
+							if (tmp > vi)
+							{
+								vi = tmp;
+								ans = moves[i];
+							}
 						}
 					}
 					DelPiece(aim);
@@ -474,25 +488,27 @@ namespace ChineseChess
 					int l = DirectMove[Row[x], y, 0];
 					int r = DirectMove[Row[x], y, 1] > 8 ? 8 : DirectMove[Row[x], y, 1];
 					for (int j = l; j <= r; ++j)
+						if(j != y)
 						tmp.Add(new pair(cur, x * 9 + j));
 					//行吃子
 					--l;
-					if (l >= 0 && map[x, l] != CType.None && ThisOrThat ^ (map[x, l] >= CType.ThatRook))
+					if (l >= 0 && map[x, l] != CType.None && ThisOrThat ^ (map[x, l] < CType.ThatRook))
 						tmp.Add(new pair(cur, x * 9 + l));
 					++r;
-					if (r < 9 && map[x, r] != CType.None && ThisOrThat ^ (map[x, r] >= CType.ThatRook))
+					if (r < 9 && map[x, r] != CType.None && ThisOrThat ^ (map[x, r] < CType.ThatRook))
 						tmp.Add(new pair(cur, x * 9 + r));
 					//列
 					l = DirectMove[Col[y], x, 0];
 					r = DirectMove[Col[y], x, 1];
 					for (int j = l; j <= r; ++j)
+						if(j != x)
 						tmp.Add(new pair(cur, j * 9 + y));
 					//列吃子
 					--l;
-					if (l >= 0 && map[l, y] != CType.None && ThisOrThat ^ (map[l, y] >= CType.ThatRook))
+					if (l >= 0 && map[l, y] != CType.None && ThisOrThat ^ (map[l, y] < CType.ThatRook))
 						tmp.Add(new pair(cur, l * 9 + y));
 					++r;
-					if (r < 10 && map[r, y] != CType.None && ThisOrThat ^ (map[r, y] >= CType.ThatRook))
+					if (r < 10 && map[r, y] != CType.None && ThisOrThat ^ (map[r, y] < CType.ThatRook))
 						tmp.Add(new pair(cur, r * 9 + y));
 				}
 				//炮
@@ -505,25 +521,27 @@ namespace ChineseChess
 					int l = DirectMove[Row[x], y, 0];
 					int r = DirectMove[Row[x], y, 1] > 8 ? 8 : DirectMove[Row[x], y, 1];
 					for (int j = l; j <= r; ++j)
+						if(j != y)
 						tmp.Add(new pair(cur, x * 9 + j));
 					//行吃子
 					l = CannonFly[Row[x], y, 0];
-					if (l >= 0 && map[x, l] != CType.None && ThisOrThat ^ (map[x, l] >= CType.ThatRook))
+					if (l >= 0 && map[x, l] != CType.None && ThisOrThat ^ (map[x, l] < CType.ThatRook))
 						tmp.Add(new pair(cur, x * 9 + l));
 					r = CannonFly[Row[x], y, 1];
-					if (r >= 0 && map[x, r] != CType.None && ThisOrThat ^ (map[x, r] >= CType.ThatRook))
+					if (r >= 0 && map[x, r] != CType.None && ThisOrThat ^ (map[x, r] < CType.ThatRook))
 						tmp.Add(new pair(cur, x * 9 + r));
 					//列
 					l = DirectMove[Col[y], x, 0];
 					r = DirectMove[Col[y], x, 1];
 					for (int j = l; j <= r; ++j)
+						if(j != x)
 						tmp.Add(new pair(cur, j * 9 + y));
 					//列吃子
 					l = CannonFly[Col[y], x, 0];
-					if (l >= 0 && map[l, y] != CType.None && ThisOrThat ^ (map[l, y] >= CType.ThatRook))
+					if (l >= 0 && map[l, y] != CType.None && ThisOrThat ^ (map[l, y] < CType.ThatRook))
 						tmp.Add(new pair(cur, l * 9 + y));
 					r = CannonFly[Col[y], x, 0];
-					if (r >= 0 && map[r, y] != CType.None && ThisOrThat ^ (map[r, y] >= CType.ThatRook))
+					if (r >= 0 && map[r, y] != CType.None && ThisOrThat ^ (map[r, y] < CType.ThatRook))
 						tmp.Add(new pair(cur, r * 9 + y));
 				}
 				//马
@@ -537,7 +555,7 @@ namespace ChineseChess
 						if (map[px, py] == CType.None)
 						{
 							int x = chessSet[cur, 3][j].Key / 9, y = chessSet[cur, 3][j].Key % 9;
-							if(map[x, y] == CType.None || ThisOrThat ^ (map[x, y] >= CType.ThatRook))
+							if(map[x, y] == CType.None || ThisOrThat ^ (map[x, y] < CType.ThatRook))
 								tmp.Add(new pair(cur, chessSet[cur, 3][j].Key));
 						}
 					}
@@ -554,7 +572,7 @@ namespace ChineseChess
 						if (map[px, py] == CType.None)
 						{
 							int x = chessSet[cur, 2][j].Key / 9, y = chessSet[cur, 2][j].Key % 9;
-							if (map[x, y] == CType.None || ThisOrThat ^ (map[x, y] >= CType.ThatRook))
+							if (map[x, y] == CType.None || ThisOrThat ^ (map[x, y] < CType.ThatRook))
 								tmp.Add(new pair(cur, chessSet[cur, 2][j].Key));
 						}
 					}
@@ -567,7 +585,7 @@ namespace ChineseChess
 					for (int j = 0; j < chessSet[cur, 2].Count; ++j)
 					{
 						int x = chessSet[cur, 2][j].Key / 9, y = chessSet[cur, 2][j].Key % 9;
-						if (map[x, y] == CType.None || ThisOrThat ^ (map[x, y] >= CType.ThatRook))
+						if (map[x, y] == CType.None || ThisOrThat ^ (map[x, y] < CType.ThatRook))
 							tmp.Add(new pair(cur, chessSet[cur, 2][j].Key));
 					}
 				}
@@ -581,7 +599,7 @@ namespace ChineseChess
 					for (int j = 0; j < chessSet[cur, whichMatrix].Count; ++j)
 					{
 						int x = chessSet[cur, whichMatrix][j].Key / 9, y = chessSet[cur, whichMatrix][j].Key % 9;
-						if (map[x, y] == CType.None || ThisOrThat ^ (map[x, y] >= CType.ThatRook))
+						if (map[x, y] == CType.None || ThisOrThat ^ (map[x, y] < CType.ThatRook))
 							tmp.Add(new pair(cur, chessSet[cur, whichMatrix][j].Key));
 					}
 				}
@@ -593,7 +611,7 @@ namespace ChineseChess
 					for (int j = 0; j < chessSet[cur, whichMatrix].Count; ++j)
 					{
 						int x = chessSet[cur, whichMatrix][j].Key / 9, y = chessSet[cur, whichMatrix][j].Key % 9;
-						if (map[x, y] == CType.None || ThisOrThat ^ (map[x, y] >= CType.ThatRook))
+						if (map[x, y] == CType.None || ThisOrThat ^ (map[x, y] < CType.ThatRook))
 							tmp.Add(new pair(cur, chessSet[cur, whichMatrix][j].Key));
 					}
 				}
@@ -621,8 +639,6 @@ namespace ChineseChess
 						if (!(thisKingCol == thatKingCol && Col[thisKingCol] == 513))
 							vi = Math.Max(-AlphaBeta(depth - 1, !ThisOrThat), vi);
 					}
-					else
-						vi = Math.Max(vi, ThisOrThat ? ThisValue - ThatValue : ThatValue - ThisValue);
 					DelPiece(aim);
 					AddPiece(aim, defense);
 					AddPiece(cur, attack);

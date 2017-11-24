@@ -97,12 +97,16 @@ namespace ChineseChess
 					list.RemoveAt(list.Count - 1);
 					ChessType typeS = op.typeS, typeE = op.typeE;
 					Player playerE = whichPlayer, playerS = (Player)((int)whichPlayer ^ 1);
+					CType tmp = ai.DelPiece(op.end.Y * 9 + op.end.X);
 					model[playerS, typeS].Location = op.start;
 					model[playerS, typeS].Live = true;
+					ai.AddPiece(op.start.Y * 9 + op.start.X, tmp);
 					if(typeE != ChessType.None)
 					{
 						model[playerE, typeE].Location = op.end;
 						model[playerE, typeE].Live = true;
+						int ThisOrThat = tmp >= CType.ThatRook ? 0 : 7;
+						ai.AddPiece(op.end.Y * 9 + op.end.X, ThisOrThat + ChessType2CType(typeE));
 					}
 					playPos[op.start.X, op.start.Y] = playerS;
 					typePos[op.start.X, op.start.Y] = typeS;
@@ -162,10 +166,11 @@ namespace ChineseChess
 					y = (int)Math.Round((y - length / 2) / length);
 					if(ChessboardClick(x, y))
 					{
-						/*pair move = ai.MaxSearch();
+						pair move = ai.MaxSearch();
+						Console.WriteLine(move.Key + " " + move.Value);
 						currentPlayer = computer;
 						currentChess = typePos[move.Key % 9, move.Key / 9];
-						ChessboardClick(move.Value % 9, move.Value / 9);*/
+						ChessboardClick(move.Value % 9, move.Value / 9);
 					}
 				}
 			};
@@ -182,7 +187,9 @@ namespace ChineseChess
 				//将军逻辑判断
 				Point loc = model[whichPlayer, ChessType.King].Location;
 				if (currentChess != ChessType.King)
-					if(LogicCheck(loc.X, loc.Y, false)) MessageBox.Show("将军");
+				{
+					if (LogicCheck(loc.X, loc.Y, false)) MessageBox.Show("将军");
+				}
 				else
 				{
 					currentPlayer = whichPlayer;
