@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 using System.Collections.Generic;
+using pair = System.Collections.Generic.KeyValuePair<int, int>;
 
 namespace ChineseChess
 {
@@ -47,22 +48,6 @@ namespace ChineseChess
 			model = new Model();
 			ai = new AI();
 			currentPlayer = Player.None;
-			/*string s = "";
-			for(int i = 0; i < 90; ++i)
-			{
-				if (i % 9 == 0)
-				{
-					Console.WriteLine(s);
-					s = "";
-				}
-				if (ai.chessSet[i, 2].Count > 0)
-					s += ai.chessSet[i, 2][0].Value + " ";
-				else
-					s += "0 ";
-				s += ai.chessSet[i, 0].Count + " ";
-
-			}
-			Console.WriteLine(s);*/
 			currentChess = ChessType.None;
 			playPos = new Player[9, 10];
 			typePos = new ChessType[9, 10];
@@ -175,13 +160,19 @@ namespace ChineseChess
 					int x = e.Location.X, y = e.Location.Y;
 					x = (int)Math.Round((x - length / 2) / length);
 					y = (int)Math.Round((y - length / 2) / length);
-					ChessboardClick(x, y);
+					if(ChessboardClick(x, y))
+					{
+						/*pair move = ai.MaxSearch();
+						currentPlayer = computer;
+						currentChess = typePos[move.Key % 9, move.Key / 9];
+						ChessboardClick(move.Value % 9, move.Value / 9);*/
+					}
 				}
 			};
 		}
 
 		//棋盘落子判断
-		private void ChessboardClick(int x, int y)
+		private bool ChessboardClick(int x, int y)
 		{
 			if ((x != model[currentPlayer, currentChess].Location.X ||
 					y != model[currentPlayer, currentChess].Location.Y) && LogicCheck(x, y, true))
@@ -191,11 +182,7 @@ namespace ChineseChess
 				//将军逻辑判断
 				Point loc = model[whichPlayer, ChessType.King].Location;
 				if (currentChess != ChessType.King)
-				{
-					//MessageBox.Show(loc.X + " " + loc.Y + " " + x + " " + y);
-					//MessageBox.Show(direction.ToString());
 					if(LogicCheck(loc.X, loc.Y, false)) MessageBox.Show("将军");
-				}
 				else
 				{
 					currentPlayer = whichPlayer;
@@ -206,6 +193,7 @@ namespace ChineseChess
 							break;
 						}
 				}
+				return true;
 			}
 			currentPlayer = Player.None;
 			currentChess = ChessType.None;
@@ -218,6 +206,7 @@ namespace ChineseChess
 			{
 				MessageBox.Show("红棋胜!");
 			}
+			return false;
 		}
 
 		//棋子单击判断（注意，由于对方棋子enabled设置为false，因此单击事件是失效的）
@@ -504,12 +493,15 @@ namespace ChineseChess
 					Player tmpPlayer = playPos[x, y];
 					ChessType tmpType = typePos[x, y];
 					model[tmpPlayer, tmpType].Live = false;
+					ai.DelPiece(y * 9 + x);
 				}
 				//棋子移动
-				playPos[model[currentPlayer, currentChess].Location.X, model[currentPlayer, currentChess].Location.Y] = Player.None;
-				typePos[model[currentPlayer, currentChess].Location.X, model[currentPlayer, currentChess].Location.Y] = ChessType.None;
+				playPos[currentX, currentY] = Player.None;
+				typePos[currentX, currentY] = ChessType.None;
+				CType moveType = ai.DelPiece(currentY * 9 + currentX);
 				playPos[x, y] = currentPlayer;
 				typePos[x, y] = currentChess;
+				ai.AddPiece(y * 9 + x, moveType);
 				model[currentPlayer, currentChess].Location = new Point(x, y);
 			}
 			return true;
