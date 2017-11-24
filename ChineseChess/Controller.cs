@@ -167,7 +167,7 @@ namespace ChineseChess
 					if(ChessboardClick(x, y))
 					{
 						pair move = ai.MaxSearch();
-						Console.WriteLine(move.Key + " " + move.Value);
+						//Console.WriteLine(move.Key + " " + move.Value);
 						if(move.Key < 0)
 						{
 

@@ -449,10 +449,7 @@ namespace ChineseChess
 				for(int i = 0; i < moves.Count; ++i)
 				{
 					int cur = moves[i].Key, aim = moves[i].Value;
-					if(cur == 31 && aim == 40)
-					{
-						Console.WriteLine(123);
-					}
+
 					CType attack = DelPiece(cur);
 					CType defense = DelPiece(aim);
 					AddPiece(aim, attack);
@@ -462,7 +459,7 @@ namespace ChineseChess
 						int thatKingCol = pos[(int)CType.ThatKing][0] % 9;
 						if (!(thisKingCol == thatKingCol && Col[thisKingCol] == 513))
 						{
-							int tmp = -AlphaBeta(2, true);
+							int tmp = -AlphaBeta(vi, 4, true);
 							if (tmp > vi)
 							{
 								vi = tmp;
@@ -471,7 +468,7 @@ namespace ChineseChess
 						}
 					}else
 					{
-						int tmp = -AlphaBeta(2, true);
+						int tmp = -AlphaBeta(vi, 4, true);
 						if (tmp > vi)
 						{
 							vi = tmp;
@@ -481,6 +478,8 @@ namespace ChineseChess
 					DelPiece(aim);
 					AddPiece(aim, defense);
 					AddPiece(cur, attack);
+					if (vi > 2000)
+						break;
 				}
 				Console.WriteLine(vi);
 				return ans;
@@ -632,20 +631,16 @@ namespace ChineseChess
 			}
 
 			//极小极大搜索
-			int AlphaBeta(int depth, bool ThisOrThat)
+			int AlphaBeta(int vf, int depth, bool ThisOrThat)
 			{
-				if (depth <= 0)
-					return ThisOrThat? ThisValue - ThatValue : ThatValue - ThisValue;
+				if(depth <= 0 || pos[(int)CType.ThisKing].Count == 0 || pos[(int)CType.ThatKing].Count == 0)
+					return ThisOrThat ? ThisValue - ThatValue : ThatValue - ThisValue;
 				//vi暂存当前AlphaBeta过程最大值
 				int vi = Int32.MinValue;
 				List<pair> moves = GetMoves(ThisOrThat);
 				for(int i = 0; i < moves.Count; ++i)
 				{
 					int cur = moves[i].Key, aim = moves[i].Value;
-					if(aim == 4)
-					{
-						Console.WriteLine("456");
-					}
 					CType attack = DelPiece(cur);
 					CType defense = DelPiece(aim);
 					AddPiece(aim, attack);
@@ -654,12 +649,14 @@ namespace ChineseChess
 						int thisKingCol = pos[(int)CType.ThisKing][0] % 9;
 						int thatKingCol = pos[(int)CType.ThatKing][0] % 9;
 						if (!(thisKingCol == thatKingCol && Col[thisKingCol] == 513))
-							vi = Math.Max(-AlphaBeta(depth - 1, !ThisOrThat), vi);
+							vi = Math.Max(-AlphaBeta(vi, depth - 1, !ThisOrThat), vi);
 					}else
-						vi = Math.Max(-AlphaBeta(depth - 1, !ThisOrThat), vi);
+						vi = Math.Max(-AlphaBeta(vi, depth - 1, !ThisOrThat), vi);
 					DelPiece(aim);
 					AddPiece(aim, defense);
 					AddPiece(cur, attack);
+					if (vi + vf >= 0)
+						return vi;
 				}
 				return vi;
 			}
