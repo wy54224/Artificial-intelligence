@@ -168,9 +168,16 @@ namespace ChineseChess
 					{
 						pair move = ai.MaxSearch();
 						Console.WriteLine(move.Key + " " + move.Value);
-						currentPlayer = computer;
-						currentChess = typePos[move.Key % 9, move.Key / 9];
-						ChessboardClick(move.Value % 9, move.Value / 9);
+						if(move.Key < 0)
+						{
+
+						}
+						else
+						{
+							currentPlayer = computer;
+							currentChess = typePos[move.Key % 9, move.Key / 9];
+							ChessboardClick(move.Value % 9, move.Value / 9);
+						}
 					}
 				}
 			};
@@ -179,6 +186,7 @@ namespace ChineseChess
 		//棋盘落子判断
 		private bool ChessboardClick(int x, int y)
 		{
+			bool value = false;
 			if ((x != model[currentPlayer, currentChess].Location.X ||
 					y != model[currentPlayer, currentChess].Location.Y) && LogicCheck(x, y, true))
 			{
@@ -200,7 +208,7 @@ namespace ChineseChess
 							break;
 						}
 				}
-				return true;
+				value = true;
 			}
 			currentPlayer = Player.None;
 			currentChess = ChessType.None;
@@ -213,7 +221,7 @@ namespace ChineseChess
 			{
 				MessageBox.Show("红棋胜!");
 			}
-			return false;
+			return value;
 		}
 
 		//棋子单击判断（注意，由于对方棋子enabled设置为false，因此单击事件是失效的）

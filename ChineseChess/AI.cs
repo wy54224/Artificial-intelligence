@@ -132,13 +132,13 @@ namespace ChineseChess
 							14, 18, 20, 27, 29, 27, 20, 18, 14,
 							 7,  0, 13,  0, 16,  0, 13,  0,  7,
 							 7,  0,  7,  0, 15,  0,  7,  0,  7,
-							 0,  0,  0,  1,  1,  1,  0,  0,  0,
-							 0,  0,  0,  2,  2,  2,  0,  0,  0,
-							 0,  0,  0, 11, 15, 11,  0,  0,  0},
+							 0,  0,  0,  10001,  10001,  10001,  0,  0,  0,
+							 0,  0,  0,  10002,  10002,  10002,  0,  0,  0,
+							 0,  0,  0, 10011, 10015, 10011,  0,  0,  0},
 				//7
-				new int[90]{ 0,  0,  0, 11, 15, 11,  0,  0,  0,
-							 0,  0,  0,  2,  2,  2,  0,  0,  0,
-							 0,  0,  0,  1,  1,  1,  0,  0,  0,
+				new int[90]{ 0,  0,  0, 10011, 10015, 10011,  0,  0,  0,
+							 0,  0,  0,  10002,  10002,  10002,  0,  0,  0,
+							 0,  0,  0,  10001,  10001,  10001,  0,  0,  0,
 							 7,  0,  7,  0, 15,  0,  7,  0,  7,
 							 7,  0, 13,  0, 16,  0, 13,  0,  7,
 							14, 18, 20, 27, 29, 27, 20, 18, 14,
@@ -449,6 +449,10 @@ namespace ChineseChess
 				for(int i = 0; i < moves.Count; ++i)
 				{
 					int cur = moves[i].Key, aim = moves[i].Value;
+					if(cur == 31 && aim == 40)
+					{
+						Console.WriteLine(123);
+					}
 					CType attack = DelPiece(cur);
 					CType defense = DelPiece(aim);
 					AddPiece(aim, attack);
@@ -465,11 +469,20 @@ namespace ChineseChess
 								ans = moves[i];
 							}
 						}
+					}else
+					{
+						int tmp = -AlphaBeta(2, true);
+						if (tmp > vi)
+						{
+							vi = tmp;
+							ans = moves[i];
+						}
 					}
 					DelPiece(aim);
 					AddPiece(aim, defense);
 					AddPiece(cur, attack);
 				}
+				Console.WriteLine(vi);
 				return ans;
 			}
 
@@ -629,6 +642,10 @@ namespace ChineseChess
 				for(int i = 0; i < moves.Count; ++i)
 				{
 					int cur = moves[i].Key, aim = moves[i].Value;
+					if(aim == 4)
+					{
+						Console.WriteLine("456");
+					}
 					CType attack = DelPiece(cur);
 					CType defense = DelPiece(aim);
 					AddPiece(aim, attack);
@@ -638,7 +655,8 @@ namespace ChineseChess
 						int thatKingCol = pos[(int)CType.ThatKing][0] % 9;
 						if (!(thisKingCol == thatKingCol && Col[thisKingCol] == 513))
 							vi = Math.Max(-AlphaBeta(depth - 1, !ThisOrThat), vi);
-					}
+					}else
+						vi = Math.Max(-AlphaBeta(depth - 1, !ThisOrThat), vi);
 					DelPiece(aim);
 					AddPiece(aim, defense);
 					AddPiece(cur, attack);
