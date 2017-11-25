@@ -2,7 +2,9 @@
 using System.Drawing;
 using System.Windows.Forms;
 using System.Collections.Generic;
+using System.Threading;
 using pair = System.Collections.Generic.KeyValuePair<int, int>;
+using tri = System.Collections.Generic.KeyValuePair<int, System.Collections.Generic.KeyValuePair<int, int>>;
 
 namespace ChineseChess
 {
@@ -125,9 +127,12 @@ namespace ChineseChess
 		private void ChessEnableSet(Player whichPlayer)
 		{
 			int i = (int)whichPlayer;
+			Console.WriteLine(i);
 			view.whichPlayer[i].Visible = true;
 			view.whichPlayer[i ^ 1].Visible = false;
-			for(ChessType j = ChessType.Rook1; j <= ChessType.Pawn5; ++j)
+			view.whichPlayer[i ^ 1].Refresh();
+			//view.whichPlayer[i].Refresh();
+			for (ChessType j = ChessType.Rook1; j <= ChessType.Pawn5; ++j)
 			{
 				model[whichPlayer, j].Enabled = true;
 				model[(Player)(i ^ 1), j].Enabled = false;
@@ -166,18 +171,33 @@ namespace ChineseChess
 					y = (int)Math.Round((y - length / 2) / length);
 					if(ChessboardClick(x, y))
 					{
-						pair move = ai.MaxSearch();
-						//Console.WriteLine(move.Key + " " + move.Value);
-						if(move.Key < 0)
-						{
-
-						}
-						else
-						{
-							currentPlayer = computer;
-							currentChess = typePos[move.Key % 9, move.Key / 9];
-							ChessboardClick(move.Value % 9, move.Value / 9);
-						}
+						Thread thread = new Thread((ThreadStart)delegate {
+							DateTime start = DateTime.Now;
+							pair move;
+							for (int i = 1; ; ++i)
+							{
+								tri aiMove = ai.MaxSearch(i);
+								move = aiMove.Value;
+								//Console.WriteLine(move.Key + " " + move.Value);
+								if (aiMove.Key > 2000 || aiMove.Key < -2000 || (DateTime.Now - start).TotalSeconds > 1)
+									break;
+								//Console.WriteLine(i);
+							}
+							if (move.Key < 0)
+							{
+								Console.WriteLine("没法走了");
+							}
+							else
+							{
+								currentPlayer = computer;
+								currentChess = typePos[move.Key % 9, move.Key / 9];
+								view.Invoke((EventHandler)delegate
+								{
+									ChessboardClick(move.Value % 9, move.Value / 9);
+								});
+							}
+						});
+						thread.Start();
 					}
 				}
 			};

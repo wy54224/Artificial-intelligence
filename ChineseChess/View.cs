@@ -169,7 +169,7 @@ namespace ChineseChess
 				tmp1.Y *= gridLength;
 				chesspiece[i + 16].Picture.Location = tmp2;
 				picturebox2.Controls.Add(chesspiece[i + 16].Picture);
-				controller.SetChess(chesspiece[i + 16]);
+				//controller.SetChess(chesspiece[i + 16]);
 			}
 		}
 		#endregion

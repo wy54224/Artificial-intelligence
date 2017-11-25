@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System;
 using pair = System.Collections.Generic.KeyValuePair<int, int>;
+using tri = System.Collections.Generic.KeyValuePair<int, System.Collections.Generic.KeyValuePair<int, int>>;
 
 namespace ChineseChess
 {
@@ -50,6 +51,9 @@ namespace ChineseChess
 			//车炮预置着法生成器
 			public int[,,] DirectMove;
 			public int[,,] CannonFly;
+
+			//历史表，一个90进制的两位数
+			int[] history;
 
 			//价值评估
 			//为了减少每次计算黑棋反转的代价存储的时候就存一个翻转数组up side down
@@ -394,6 +398,9 @@ namespace ChineseChess
 					for (int j = 0; j < 9; ++j)
 						if (map[i, j] != CType.None)
 							pos[(int)map[i, j]].Add(i * 9 + j);
+
+				//历史表建立
+				history = new int[8100];
 			}
 			
 			//获取对应位置棋子的估值
@@ -440,35 +447,33 @@ namespace ChineseChess
 			}
 
 			//获取结果的max搜索
-			public pair MaxSearch()
+			public tri MaxSearch(int depth)
 			{
-				int vi = Int32.MinValue;
+				int vi = Int32.MinValue + 10;
 				pair ans = new pair(-1, -1);
 				//初始是从that方开始的
+				//其他类似与下面的alpha-beta过程
 				List<pair> moves = GetMoves(false);
 				for(int i = 0; i < moves.Count; ++i)
 				{
 					int cur = moves[i].Key, aim = moves[i].Value;
+					bool bj = false;
 
 					CType attack = DelPiece(cur);
 					CType defense = DelPiece(aim);
 					AddPiece(aim, attack);
-					if(pos[(int)CType.ThisKing].Count == 1 && pos[(int)CType.ThatKing].Count == 1)
+					if (pos[(int)CType.ThisKing].Count == 1 && pos[(int)CType.ThatKing].Count == 1)
 					{
 						int thisKingCol = pos[(int)CType.ThisKing][0] % 9;
 						int thatKingCol = pos[(int)CType.ThatKing][0] % 9;
 						if (!(thisKingCol == thatKingCol && Col[thisKingCol] == 513))
-						{
-							int tmp = -AlphaBeta(vi, 4, true);
-							if (tmp > vi)
-							{
-								vi = tmp;
-								ans = moves[i];
-							}
-						}
-					}else
+							bj = true;
+					}
+					else
+						bj = true;
+					if (bj)
 					{
-						int tmp = -AlphaBeta(vi, 4, true);
+						int tmp = -AlphaBeta(Int32.MinValue + 10, -vi, depth - 1, true);
 						if (tmp > vi)
 						{
 							vi = tmp;
@@ -478,11 +483,14 @@ namespace ChineseChess
 					DelPiece(aim);
 					AddPiece(aim, defense);
 					AddPiece(cur, attack);
+					//如果已经是必胜的局面（一定能吃掉将或者帅），那就随便走吧
 					if (vi > 2000)
 						break;
 				}
-				Console.WriteLine(vi);
-				return ans;
+				//Console.WriteLine(vi);
+				if (ans.Key >= 0 && ans.Value >= 0)
+					history[ans.Key * 90 + ans.Value] += depth * depth;
+				return new tri(vi, ans);
 			}
 
 			//生成当前棋局的所有走法
@@ -627,38 +635,57 @@ namespace ChineseChess
 							tmp.Add(new pair(cur, chessSet[cur, whichMatrix][j].Key));
 					}
 				}
+				//历史表排序
+				tmp.Sort(
+					(pair lsh, pair rsh)=> {
+						int lValue = history[lsh.Key * 90 + lsh.Value], rValue = history[rsh.Key * 90 + rsh.Value];
+						return lValue > rValue ? -1 : (lValue == rValue ? 0 : 1);
+				});
 				return tmp;
 			}
 
 			//极小极大搜索
-			int AlphaBeta(int vf, int depth, bool ThisOrThat)
+			int AlphaBeta(int _alpha, int beta, int depth, bool ThisOrThat)
 			{
 				if(depth <= 0 || pos[(int)CType.ThisKing].Count == 0 || pos[(int)CType.ThatKing].Count == 0)
 					return ThisOrThat ? ThisValue - ThatValue : ThatValue - ThisValue;
-				//vi暂存当前AlphaBeta过程最大值
-				int vi = Int32.MinValue;
+				int alpha = _alpha;
+				//生成所有走法
 				List<pair> moves = GetMoves(ThisOrThat);
 				for(int i = 0; i < moves.Count; ++i)
 				{
-					int cur = moves[i].Key, aim = moves[i].Value;
+					int cur = moves[i].Key, aim = moves[i].Value, vi = Int32.MinValue;
+					bool bj = false;
 					CType attack = DelPiece(cur);
 					CType defense = DelPiece(aim);
 					AddPiece(aim, attack);
 					if (pos[(int)CType.ThisKing].Count == 1 && pos[(int)CType.ThatKing].Count == 1)
 					{
+						//将|帅均存在，则用列位棋盘判断一下是否照面
 						int thisKingCol = pos[(int)CType.ThisKing][0] % 9;
 						int thatKingCol = pos[(int)CType.ThatKing][0] % 9;
 						if (!(thisKingCol == thatKingCol && Col[thisKingCol] == 513))
-							vi = Math.Max(-AlphaBeta(vi, depth - 1, !ThisOrThat), vi);
-					}else
-						vi = Math.Max(-AlphaBeta(vi, depth - 1, !ThisOrThat), vi);
+							bj = true;
+					}
+					else
+						//这一步把某个将|帅吃掉了
+						bj = true;
+					//子节点区间受父节点控制——取反过程会将区间也取反
+					if(bj)
+						vi = -AlphaBeta(-beta, -alpha, depth - 1, !ThisOrThat);
 					DelPiece(aim);
 					AddPiece(aim, defense);
 					AddPiece(cur, attack);
-					if (vi + vf >= 0)
-						return vi;
+					//修改alpha下界
+					alpha = Math.Max(vi, alpha);
+					//下界超出上界——beta截断
+					if (alpha >= beta)
+					{
+						history[cur * 90 + aim] += depth * depth;
+						return beta;
+					}
 				}
-				return vi;
+				return alpha;
 			}
 		}
 	}
