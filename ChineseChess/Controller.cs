@@ -173,7 +173,7 @@ namespace ChineseChess
 					{
 						Thread thread = new Thread((ThreadStart)delegate {
 							DateTime start = DateTime.Now;
-							pair move;
+							pair move = new pair(-1, -1);
 							for (int i = 1; ; ++i)
 							{
 								tri aiMove = ai.MaxSearch(i);

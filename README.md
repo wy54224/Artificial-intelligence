@@ -11,3 +11,8 @@
   * 爬山法
   * 模拟退火
   * 动态显示这些算法的过程
+
+* ### [象棋](https://github.com/wy54224/Artificial-intelligence/tree/master/ChineseChess)
+  * MVC模型
+  * Alpha-Beta剪枝
+  * 运用历史表优化搜索
