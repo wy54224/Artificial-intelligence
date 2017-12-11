@@ -1,0 +1,7 @@
+#Description file
+/ALL_tsp/*
+*.docx
+
+#Visual Studio project file
+/.vs/*
+/obj/*
