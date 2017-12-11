@@ -16,3 +16,8 @@
   * MVC模型
   * Alpha-Beta剪枝
   * 运用历史表优化搜索
+
+* ### [遗传算法解TSP问题](https://github.com/wy54224/Artificial-intelligence/tree/master/GA_TSP)
+  * 《A Powerful Genetic Algorithm Using edge assembly crossover for the TSP》
+  * 只实现了single EAX（即论文第一阶段），而且没用他的估价函数
+  * 就精确度上好像已经比模拟退火要高了
