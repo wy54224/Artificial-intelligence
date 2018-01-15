@@ -138,10 +138,22 @@ namespace TSP
 			//创建新线程执行解TSP的算法
             new Thread((ThreadStart)delegate
             {
-				if(radioButton1.Checked)
-                    GeneticAlgorithm(point);
+				if (radioButton1.Checked)
+				{
+					Invoke((EventHandler)delegate
+					{
+						label4.Text = "G = ";
+					});
+					GeneticAlgorithm(point);
+				}
 				else
+				{
+					Invoke((EventHandler)delegate
+					{
+						label4.Text = "T = ";
+					});
 					SA(point);
+				}
 				Invoke((EventHandler)delegate
 				{
 					button1.Enabled = true;
@@ -677,8 +689,9 @@ namespace TSP
                     {
                         Invoke((EventHandler)delegate {
                             label3.Text = now.ToString();
-                            //label9.Text = ga.generation.ToString();
+							//label9.Text = ga.generation.ToString();
 							label9.Text = ((pbest.score - aimValue) / aimValue * 100).ToString("f2") + "%";
+							label1.Text = ga.generation.ToString();
 							if (origin != null) origin.Dispose();
                             
                             origin = new Bitmap(picBoxWidth, picBoxHeight);
